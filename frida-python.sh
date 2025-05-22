@@ -31,7 +31,7 @@ apt update && pkg upgrade -y
 pkg i -y python git curl && pip install -U setuptools
 
 # Fetch latest Frida version
-FRIDA_VERSION=$(curl -s https://api.github.com/repos/Alexjr2/Frida_Termux_Installation/releases/latest | grep -oP '"tag_name":\s*"\K[^"]+')
+FRIDA_VERSION="17.0.1"
 
 # Download Frida devkit
 DEVKIT_URL="https://github.com/Alexjr2/Frida_Termux_Installation/releases/latest/download/frida-core-devkit-android-$arch.tar.xz"
