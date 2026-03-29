@@ -28,7 +28,7 @@ jobs:
       id: setup-ndk
       uses: nttld/setup-ndk@main
       with:
-        ndk-version: r25b
+        ndk-version: r29
         add-to-path: false
 
     - name: add ANDROID_NDK_ROOT to environment
