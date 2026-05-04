@@ -67,13 +67,13 @@ jobs:
       run: cd frida && make && make install
 
     - name: tar core devkit
-      run: cd release-assets && tar -cJvf frida-core-devkit-android-${{ matrix.arch }}.tar.xz -C ../frida${{ env.FRIDA_PREFIX }}/lib/frida/devkits/core/ .
+      run: cd release-assets && tar -cJvf frida-core-devkit-android-${{ matrix.arch }}.tar.xz -C ../frida${{ env.FRIDA_PREFIX }}/lib/frida-1.0/devkits/core/ .
 
     - name: tar gum devkit
-      run: cd release-assets && tar -cJvf frida-gum-devkit-android-${{ matrix.arch }}.tar.xz -C ../frida${{ env.FRIDA_PREFIX }}/lib/frida/devkits/gum/ .
+      run: cd release-assets && tar -cJvf frida-gum-devkit-android-${{ matrix.arch }}.tar.xz -C ../frida${{ env.FRIDA_PREFIX }}/lib/frida-1.0/devkits/gum/ .
 
     - name: tar gumjs devkit
-      run: cd release-assets && tar -cJvf frida-gumjs-devkit-android-${{ matrix.arch }}.tar.xz -C ../frida${{ env.FRIDA_PREFIX }}/lib/frida/devkits/gumjs/ .
+      run: cd release-assets && tar -cJvf frida-gumjs-devkit-android-${{ matrix.arch }}.tar.xz -C ../frida${{ env.FRIDA_PREFIX }}/lib/frida-1.0/devkits/gumjs/ .
 
     - name: tar frida-inject
       run: cd release-assets && tar -cJvf frida-inject-android-${{ matrix.arch }}.tar.xz -C ../frida${{ env.FRIDA_PREFIX }}/bin/ frida-inject
@@ -83,11 +83,11 @@ jobs:
 
     - name: tar 32-bit frida-gadget
       if: ${{ !contains(matrix.arch, '64') }}
-      run: cd release-assets && tar -cJvf frida-gadget-android-${{ matrix.arch }}.tar.xz -C ../frida${{ env.FRIDA_PREFIX }}/lib/frida/32/ frida-gadget.so
+      run: cd release-assets && tar -cJvf frida-gadget-android-${{ matrix.arch }}.tar.xz -C ../frida${{ env.FRIDA_PREFIX }}/lib/frida-1.0/32/ frida-gadget.so
 
     - name: tar 64-bit frida-gadget
       if: ${{ contains(matrix.arch, '64') }}
-      run: cd release-assets && tar -cJvf frida-gadget-android-${{ matrix.arch }}.tar.xz -C ../frida${{ env.FRIDA_PREFIX }}/lib/frida/64/ frida-gadget.so
+      run: cd release-assets && tar -cJvf frida-gadget-android-${{ matrix.arch }}.tar.xz -C ../frida${{ env.FRIDA_PREFIX }}/lib/frida-1.0/64/ frida-gadget.so
 
     - name: Create release frida ${{ matrix.arch }}
       uses: ncipollo/release-action@main
