@@ -7,7 +7,7 @@ apt update && apt upgrade && apt install build-essential python python-pip git w
 ```
 ## Installing frida
 ```
-cd $TMPDIR && wget https://raw.githubusercontent.com/Alexjr2/Frida_Termux_Installation/refs/heads/main/frida-python.sh && bash frida-python.sh && cd && pip install frida-tools && pip cache purge
+cd $TMPDIR && wget https://raw.githubusercontent.com/Alexjr2/Frida_Termux_Installation/main/frida-python.sh && bash frida-python.sh && cd && pip install frida-tools && pip cache purge
 ```
 # Credits
 - [frida](https://github.com/frida/frida) : Official Frida Repository
