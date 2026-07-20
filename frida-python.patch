@@ -1,145 +1,8 @@
-diff --git a/BSDmakefile b/BSDmakefile
-deleted file mode 100644
-index 1d8e4fd..0000000
---- a/BSDmakefile
-+++ /dev/null
-@@ -1,6 +0,0 @@
--all: .DEFAULT
--
--.DEFAULT:
--	@gmake ${.MAKEFLAGS} ${.TARGETS}
--
--.PHONY: all
-diff --git a/COPYING b/COPYING
-deleted file mode 100644
-index b01d49c..0000000
---- a/COPYING
-+++ /dev/null
-@@ -1,50 +0,0 @@
--              wxWindows Library Licence, Version 3.1
--              ======================================
--
--Copyright (c) 1998-2005 Julian Smart, Robert Roebling et al
--
--Everyone is permitted to copy and distribute verbatim copies
--of this licence document, but changing it is not allowed.
--
--                     WXWINDOWS LIBRARY LICENCE
--   TERMS AND CONDITIONS FOR COPYING, DISTRIBUTION AND MODIFICATION
--
--This library is free software; you can redistribute it and/or modify it
--under the terms of the GNU Library General Public Licence as published by
--the Free Software Foundation; either version 2 of the Licence, or (at your
--option) any later version.
--
--This library is distributed in the hope that it will be useful, but WITHOUT
--ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
--FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Library General Public
--Licence for more details.
--
--You should have received a copy of the GNU Library General Public Licence
--along with this software, usually in a file named COPYING.LIB.  If not,
--write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth
--Floor, Boston, MA 02110-1301 USA.
--
--EXCEPTION NOTICE
--
--1. As a special exception, the copyright holders of this library give
--permission for additional uses of the text contained in this release of the
--library as licenced under the wxWindows Library Licence, applying either
--version 3.1 of the Licence, or (at your option) any later version of the
--Licence as published by the copyright holders of version 3.1 of the Licence
--document.
--
--2. The exception is that you may use, copy, link, modify and distribute
--under your own terms, binary object code versions of works based on the
--Library.
--
--3. If you copy code from files distributed under the terms of the GNU
--General Public Licence or the GNU Library General Public Licence into a
--copy of this library, as this licence permits, the exception does not apply
--to the code that you add in this way.  To avoid misleading anyone as to the
--status of such modified files, you must delete this exception notice from
--such code and/or adjust the licensing conditions notice accordingly.
--
--4. If you write modifications of your own for this library, it is your
--choice whether to permit this exception to apply to your modifications.  If
--you do not wish that, you must delete the exception notice from such code
--and/or adjust the licensing conditions notice accordingly.
-diff --git a/MANIFEST.in b/MANIFEST.in
-deleted file mode 100644
-index fc1fd43..0000000
---- a/MANIFEST.in
-+++ /dev/null
-@@ -1,19 +0,0 @@
--include meson.build
--include frida/meson.build
--include frida/_frida/extension.c
--include frida/_frida/extension.version
--include frida/_frida/meson.build
--include subprojects/frida-core.wrap
--
--include BSDmakefile
--include Makefile
--include configure
--include configure.bat
--include make.bat
--include releng/*.py
--include releng/*.toml
--graft releng/devkit-assets/
--graft releng/meson-scripts/
--include releng/meson/meson.py
--graft releng/meson/mesonbuild/
--graft releng/tomlkit/tomlkit/
-diff --git a/Makefile b/Makefile
-deleted file mode 100644
-index 8774db7..0000000
---- a/Makefile
-+++ /dev/null
-@@ -1,16 +0,0 @@
--PYTHON ?= $(shell which python3 >/dev/null && echo python3 || echo python)
--
--all $(MAKECMDGOALS):
--	@$(PYTHON) \
--		-c "import sys; sys.path.insert(0, sys.argv[1]); from releng.meson_make import main; main()" \
--		"$(shell pwd)" \
--		./build \
--		$(MAKECMDGOALS)
--
--git-submodules:
--	@if [ ! -f releng/meson/meson.py ]; then \
--		git submodule update --init --recursive --depth 1; \
--	fi
---include git-submodules
--
--.PHONY: all $(MAKECMDGOALS)
-diff --git a/README.md b/README.md
-deleted file mode 100644
-index e84d96a..0000000
---- a/README.md
-+++ /dev/null
-@@ -1,16 +0,0 @@
--# frida-python
--
--Python bindings for [Frida](https://frida.re).
--
--# Some tips during development
--
--To build and test your own wheel, do something along the following lines:
--
--```
--set FRIDA_VERSION=16.0.1-dev.7 # from C:\src\frida\build\tmp-windows\frida-version.h
--set FRIDA_EXTENSION=C:\src\frida\build\frida-windows\x64-Release\lib\python3.10\site-packages\_frida.pyd
--cd C:\src\frida\frida-python\
--pip wheel .
--pip uninstall frida
--pip install frida-16.0.1.dev7-cp34-abi3-win_amd64.whl
--```
-diff --git a/fork/config.h.in b/fork/config.h.in
+diff --git a/config.h.in b/config.h.in
 new file mode 100644
 index 0000000..6233d30
 --- /dev/null
-+++ b/fork/config.h.in
++++ b/config.h.in
 @@ -0,0 +1,19 @@
 +/* config.h.in.  Generated from configure.ac by autoheader.  */
 +
@@ -161,7 +24,7 @@ index 0000000..6233d30
 +/* Define to 1 if OS is QNX based. */
 +#mesondefine HAVE_QNX
 diff --git a/configure b/configure
-deleted file mode 100644
+deleted file mode 100755
 index a4d189a..0000000
 --- a/configure
 +++ /dev/null
@@ -184,38 +47,10 @@ index a4d189a..0000000
 -    -c "import sys; sys.path.insert(0, sys.argv[1]); from releng.meson_configure import main; main()" \
 -    "$srcroot" \
 -    "$@"
-diff --git a/configure.bat b/configure.bat
-deleted file mode 100755
-index 721c958..0000000
---- a/configure.bat
-+++ /dev/null
-@@ -1,22 +0,0 @@
--@setlocal
--@echo off
--rem:: Based on: https://github.com/microsoft/terminal/issues/217#issuecomment-737594785
--goto :_start_
--
--:set_real_dp0
--set dp0=%~dp0
--set "dp0=%dp0:~0,-1%"
--goto :eof
--
--:_start_
--call :set_real_dp0
--
--if not exist "%dp0%\releng\meson\meson.py" (
--  pushd "%dp0%" & git submodule update --init --recursive --depth 1 & popd
--  if %errorlevel% neq 0 exit /b %errorlevel%
--)
--
--endlocal & goto #_undefined_# 2>nul || title %COMSPEC% & python ^
--    -c "import sys; sys.path.insert(0, sys.argv[1]); from releng.meson_configure import main; main()" ^
--    "%dp0%" ^
--    %*
-diff --git a/examples/child_gating.py b/fork/examples/child_gating.py
+diff --git a/examples/child_gating.py b/examples/child_gating.py
 index 0e90ac5..4c7ed13 100644
 --- a/examples/child_gating.py
-+++ b/fork/examples/child_gating.py
++++ b/examples/child_gating.py
 @@ -44,11 +44,11 @@ class Application:
          print("✔ create_script()")
          script = session.create_script(
@@ -476,11 +311,11 @@ index 4395051..0000000
 -    }
 -)
 -pprint.pp(response)
-diff --git a/fork/examples/spawn_gating.py b/fork/examples/spawn_gating.py
+diff --git a/examples/spawn_gating.py b/examples/spawn_gating.py
 new file mode 100644
 index 0000000..297dcec
 --- /dev/null
-+++ b/fork/examples/spawn_gating.py
++++ b/examples/spawn_gating.py
 @@ -0,0 +1,80 @@
 +import threading
 +
@@ -562,10 +397,10 @@ index 0000000..297dcec
 +
 +app = Application()
 +app.run()
-diff --git a/frida/__init__.py b/fork/frida/__init__.py
+diff --git a/frida/__init__.py b/frida/__init__.py
 index a8af9ae..46cf817 100644
 --- a/frida/__init__.py
-+++ b/fork/frida/__init__.py
++++ b/frida/__init__.py
 @@ -1,4 +1,4 @@
 -from typing import Any, Callable, Dict, List, Optional, Tuple, Union
 +from typing import Any, Callable, Dict, List, Optional, Sequence, Tuple, Union
@@ -613,10 +448,10 @@ index a8af9ae..46cf817 100644
  
  
  def inject_library_file(target: core.ProcessTarget, path: str, entrypoint: str, data: str) -> int:
-diff --git a/frida/_frida/__init__.pyi b/fork/frida/_frida/__init__.pyi
+diff --git a/frida/_frida/__init__.pyi b/frida/_frida/__init__.pyi
 index c2d3a9b..618e2e1 100644
 --- a/frida/_frida/__init__.pyi
-+++ b/fork/frida/_frida/__init__.pyi
++++ b/frida/_frida/__init__.pyi
 @@ -256,7 +256,17 @@ class Device(Object):
          """
          ...
@@ -797,10 +632,10 @@ index c2d3a9b..618e2e1 100644
 +        ...
 +
  __version__: str
-diff --git a/frida/_frida/extension.c b/fork/frida/_frida/extension.c
+diff --git a/frida/_frida/extension.c b/frida/_frida/extension.c
 index ee5b9ce..58ca6b0 100644
 --- a/frida/_frida/extension.c
-+++ b/fork/frida/_frida/extension.c
++++ b/frida/_frida/extension.c
 @@ -1,5 +1,5 @@
  /*
 - * Copyright (C) 2013-2023 Ole André Vadla Ravnås <oleavr@nowsecure.com>
@@ -2052,10 +1887,10 @@ index ee5b9ce..58ca6b0 100644
    PYFRIDA_REGISTER_TYPE (FileMonitor, FRIDA_TYPE_FILE_MONITOR);
    PYFRIDA_REGISTER_TYPE (IOStream, G_TYPE_IO_STREAM);
    PYFRIDA_REGISTER_TYPE (Cancellable, G_TYPE_CANCELLABLE);
-diff --git a/frida/core.py b/fork/frida/core.py
+diff --git a/frida/core.py b/frida/core.py
 index 0c65155..026c572 100644
 --- a/frida/core.py
-+++ b/fork/frida/core.py
++++ b/frida/core.py
 @@ -33,10 +33,15 @@ if sys.version_info >= (3, 8):
  else:
      from typing_extensions import Literal, TypedDict
@@ -2499,39 +2334,10 @@ index 0c65155..026c572 100644
          self._impl.off(signal, callback)
  
  
-diff --git a/make.bat b/make.bat
-deleted file mode 100755
-index 6f9f5c0..0000000
---- a/make.bat
-+++ /dev/null
-@@ -1,23 +0,0 @@
--@setlocal
--@echo off
--rem:: Based on: https://github.com/microsoft/terminal/issues/217#issuecomment-737594785
--goto :_start_
--
--:set_real_dp0
--set dp0=%~dp0
--set "dp0=%dp0:~0,-1%"
--goto :eof
--
--:_start_
--call :set_real_dp0
--
--if not exist "%dp0%\releng\meson\meson.py" (
--  pushd "%dp0%" & git submodule update --init --recursive --depth 1 & popd
--  if %errorlevel% neq 0 exit /b %errorlevel%
--)
--
--endlocal & goto #_undefined_# 2>nul || title %COMSPEC% & python ^
--    -c "import sys; sys.path.insert(0, sys.argv[1]); from releng.meson_make import main; main()" ^
--    "%dp0%" ^
--    .\build ^
--    %*
-diff --git a/meson.build b/fork/meson.build
+diff --git a/meson.build b/meson.build
 index aa96710..7455677 100644
 --- a/meson.build
-+++ b/fork/meson.build
++++ b/meson.build
 @@ -5,7 +5,12 @@ project('frida-python', 'c',
    meson_version: '>=1.3.0',
  )
@@ -2639,11 +2445,11 @@ index aa96710..7455677 100644
 -  timeout: 30,
 -)
 +subdir('frida')
-diff --git a/fork/meson_options.txt b/fork/meson_options.txt
+diff --git a/meson_options.txt b/meson_options.txt
 new file mode 100644
 index 0000000..37d05a8
 --- /dev/null
-+++ b/fork/meson_options.txt
++++ b/meson_options.txt
 @@ -0,0 +1,11 @@
 +option('python',
 +  type: 'string',
@@ -2656,10 +2462,10 @@ index 0000000..37d05a8
 +  value: '',
 +  description: 'Python headers directory to build against'
 +)
-diff --git a/setup.py b/fork/setup.py
+diff --git a/setup.py b/setup.py
 index 488e047..25fd1e1 100644
 --- a/setup.py
-+++ b/fork/setup.py
++++ b/setup.py
 @@ -1,25 +1,109 @@
  import os
  import platform
@@ -2874,10 +2680,19 @@ index 900126e..0000000
 -[provide]
 -dependency_names = frida-core-1.0
 -
-diff --git a/tests/test_rpc.py b/fork/tests/test_rpc.py
+diff --git a/tests/data/unixvictim-linux-x86 b/tests/data/unixvictim-linux-x86
+old mode 100755
+new mode 100644
+diff --git a/tests/data/unixvictim-linux-x86_64 b/tests/data/unixvictim-linux-x86_64
+old mode 100755
+new mode 100644
+diff --git a/tests/data/unixvictim-macos b/tests/data/unixvictim-macos
+old mode 100755
+new mode 100644
+diff --git a/tests/test_rpc.py b/tests/test_rpc.py
 index 318c81e..b5b1b7b 100644
 --- a/tests/test_rpc.py
-+++ b/fork/tests/test_rpc.py
++++ b/tests/test_rpc.py
 @@ -31,41 +31,27 @@ class TestRpc(unittest.TestCase):
              name="test-rpc",
              source="""\
