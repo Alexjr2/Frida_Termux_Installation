@@ -48,7 +48,7 @@ git clone -b 16.6.6 --depth 1 https://github.com/frida/frida-python.git
 # fix setup.py
 cd frida-python
 curl -LO https://raw.githubusercontent.com/Alexjr2/Frida_Termux_Installation/refs/heads/main/frida-python.patch
-patch -p1 < frida-python.patch
+git apply frida-python.patch
 
 #install frida-python
 FRIDA_VERSION="$FRIDA_VERSION" FRIDA_CORE_DEVKIT="$PWD/../devkit" pip install --force-reinstall .
