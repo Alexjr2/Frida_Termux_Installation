@@ -1,7 +1,2537 @@
-diff --git a/meson.build b/meson.build
+diff --git a/upstream/BSDmakefile b/upstream/BSDmakefile
+deleted file mode 100644
+index 1d8e4fd..0000000
+--- a/upstream/BSDmakefile
++++ /dev/null
+@@ -1,6 +0,0 @@
+-all: .DEFAULT
+-
+-.DEFAULT:
+-	@gmake ${.MAKEFLAGS} ${.TARGETS}
+-
+-.PHONY: all
+diff --git a/upstream/COPYING b/upstream/COPYING
+deleted file mode 100644
+index b01d49c..0000000
+--- a/upstream/COPYING
++++ /dev/null
+@@ -1,50 +0,0 @@
+-              wxWindows Library Licence, Version 3.1
+-              ======================================
+-
+-Copyright (c) 1998-2005 Julian Smart, Robert Roebling et al
+-
+-Everyone is permitted to copy and distribute verbatim copies
+-of this licence document, but changing it is not allowed.
+-
+-                     WXWINDOWS LIBRARY LICENCE
+-   TERMS AND CONDITIONS FOR COPYING, DISTRIBUTION AND MODIFICATION
+-
+-This library is free software; you can redistribute it and/or modify it
+-under the terms of the GNU Library General Public Licence as published by
+-the Free Software Foundation; either version 2 of the Licence, or (at your
+-option) any later version.
+-
+-This library is distributed in the hope that it will be useful, but WITHOUT
+-ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+-FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Library General Public
+-Licence for more details.
+-
+-You should have received a copy of the GNU Library General Public Licence
+-along with this software, usually in a file named COPYING.LIB.  If not,
+-write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth
+-Floor, Boston, MA 02110-1301 USA.
+-
+-EXCEPTION NOTICE
+-
+-1. As a special exception, the copyright holders of this library give
+-permission for additional uses of the text contained in this release of the
+-library as licenced under the wxWindows Library Licence, applying either
+-version 3.1 of the Licence, or (at your option) any later version of the
+-Licence as published by the copyright holders of version 3.1 of the Licence
+-document.
+-
+-2. The exception is that you may use, copy, link, modify and distribute
+-under your own terms, binary object code versions of works based on the
+-Library.
+-
+-3. If you copy code from files distributed under the terms of the GNU
+-General Public Licence or the GNU Library General Public Licence into a
+-copy of this library, as this licence permits, the exception does not apply
+-to the code that you add in this way.  To avoid misleading anyone as to the
+-status of such modified files, you must delete this exception notice from
+-such code and/or adjust the licensing conditions notice accordingly.
+-
+-4. If you write modifications of your own for this library, it is your
+-choice whether to permit this exception to apply to your modifications.  If
+-you do not wish that, you must delete the exception notice from such code
+-and/or adjust the licensing conditions notice accordingly.
+diff --git a/upstream/MANIFEST.in b/upstream/MANIFEST.in
+deleted file mode 100644
+index fc1fd43..0000000
+--- a/upstream/MANIFEST.in
++++ /dev/null
+@@ -1,19 +0,0 @@
+-include meson.build
+-include frida/meson.build
+-include frida/_frida/extension.c
+-include frida/_frida/extension.version
+-include frida/_frida/meson.build
+-include subprojects/frida-core.wrap
+-
+-include BSDmakefile
+-include Makefile
+-include configure
+-include configure.bat
+-include make.bat
+-include releng/*.py
+-include releng/*.toml
+-graft releng/devkit-assets/
+-graft releng/meson-scripts/
+-include releng/meson/meson.py
+-graft releng/meson/mesonbuild/
+-graft releng/tomlkit/tomlkit/
+diff --git a/upstream/Makefile b/upstream/Makefile
+deleted file mode 100644
+index 8774db7..0000000
+--- a/upstream/Makefile
++++ /dev/null
+@@ -1,16 +0,0 @@
+-PYTHON ?= $(shell which python3 >/dev/null && echo python3 || echo python)
+-
+-all $(MAKECMDGOALS):
+-	@$(PYTHON) \
+-		-c "import sys; sys.path.insert(0, sys.argv[1]); from releng.meson_make import main; main()" \
+-		"$(shell pwd)" \
+-		./build \
+-		$(MAKECMDGOALS)
+-
+-git-submodules:
+-	@if [ ! -f releng/meson/meson.py ]; then \
+-		git submodule update --init --recursive --depth 1; \
+-	fi
+--include git-submodules
+-
+-.PHONY: all $(MAKECMDGOALS)
+diff --git a/upstream/README.md b/upstream/README.md
+deleted file mode 100644
+index e84d96a..0000000
+--- a/upstream/README.md
++++ /dev/null
+@@ -1,16 +0,0 @@
+-# frida-python
+-
+-Python bindings for [Frida](https://frida.re).
+-
+-# Some tips during development
+-
+-To build and test your own wheel, do something along the following lines:
+-
+-```
+-set FRIDA_VERSION=16.0.1-dev.7 # from C:\src\frida\build\tmp-windows\frida-version.h
+-set FRIDA_EXTENSION=C:\src\frida\build\frida-windows\x64-Release\lib\python3.10\site-packages\_frida.pyd
+-cd C:\src\frida\frida-python\
+-pip wheel .
+-pip uninstall frida
+-pip install frida-16.0.1.dev7-cp34-abi3-win_amd64.whl
+-```
+diff --git a/fork/config.h.in b/fork/config.h.in
+new file mode 100644
+index 0000000..6233d30
+--- /dev/null
++++ b/fork/config.h.in
+@@ -0,0 +1,19 @@
++/* config.h.in.  Generated from configure.ac by autoheader.  */
++
++/* Define to 1 if OS is Android based. */
++#mesondefine HAVE_ANDROID
++
++/* Define to 1 if OS is Darwin based. */
++#mesondefine HAVE_DARWIN
++
++/* Define to 1 if OS is iOS. */
++#mesondefine HAVE_IOS
++
++/* Define to 1 if OS is Linux based. */
++#mesondefine HAVE_LINUX
++
++/* Define to 1 if OS is macOS. */
++#mesondefine HAVE_MACOS
++
++/* Define to 1 if OS is QNX based. */
++#mesondefine HAVE_QNX
+diff --git a/upstream/configure b/upstream/configure
+deleted file mode 100644
+index a4d189a..0000000
+--- a/upstream/configure
++++ /dev/null
+@@ -1,18 +0,0 @@
+-#!/bin/sh
+-
+-[ -z "$PYTHON" ] && PYTHON=$(which python3 >/dev/null && echo python3 || echo python)
+-
+-cd $(dirname $0)
+-
+-srcroot=$(pwd)
+-
+-if [ ! -f releng/meson/meson.py ]; then
+-  git submodule update --init --recursive --depth 1 || exit $?
+-fi
+-
+-cd - >/dev/null
+-
+-exec "$PYTHON" \
+-    -c "import sys; sys.path.insert(0, sys.argv[1]); from releng.meson_configure import main; main()" \
+-    "$srcroot" \
+-    "$@"
+diff --git a/upstream/configure.bat b/upstream/configure.bat
+deleted file mode 100644
+index 721c958..0000000
+--- a/upstream/configure.bat
++++ /dev/null
+@@ -1,22 +0,0 @@
+-@setlocal
+-@echo off
+-rem:: Based on: https://github.com/microsoft/terminal/issues/217#issuecomment-737594785
+-goto :_start_
+-
+-:set_real_dp0
+-set dp0=%~dp0
+-set "dp0=%dp0:~0,-1%"
+-goto :eof
+-
+-:_start_
+-call :set_real_dp0
+-
+-if not exist "%dp0%\releng\meson\meson.py" (
+-  pushd "%dp0%" & git submodule update --init --recursive --depth 1 & popd
+-  if %errorlevel% neq 0 exit /b %errorlevel%
+-)
+-
+-endlocal & goto #_undefined_# 2>nul || title %COMSPEC% & python ^
+-    -c "import sys; sys.path.insert(0, sys.argv[1]); from releng.meson_configure import main; main()" ^
+-    "%dp0%" ^
+-    %*
+diff --git a/upstream/examples/child_gating.py b/fork/examples/child_gating.py
+index 0e90ac5..4c7ed13 100644
+--- a/upstream/examples/child_gating.py
++++ b/fork/examples/child_gating.py
+@@ -44,11 +44,11 @@ class Application:
+         print("✔ create_script()")
+         script = session.create_script(
+             """\
+-Interceptor.attach(Module.getExportByName(null, 'open'), {
+-  onEnter: function (args) {
++Interceptor.attach(Module.getGlobalExportByName('open'), {
++  onEnter(args) {
+     send({
+       type: 'open',
+-      path: Memory.readUtf8String(args[0])
++      path: args[0].readUtf8String()
+     });
+   }
+ });
+diff --git a/upstream/examples/open_service/dtx/deviceinfo.py b/upstream/examples/open_service/dtx/deviceinfo.py
+deleted file mode 100644
+index ad01dfd..0000000
+--- a/upstream/examples/open_service/dtx/deviceinfo.py
++++ /dev/null
+@@ -1,9 +0,0 @@
+-import pprint
+-
+-import frida
+-
+-device = frida.get_usb_device()
+-
+-deviceinfo = device.open_service("dtx:com.apple.instruments.server.services.deviceinfo")
+-response = deviceinfo.request({"method": "runningProcesses"})
+-pprint.pp(response)
+diff --git a/upstream/examples/open_service/dtx/opengl.py b/upstream/examples/open_service/dtx/opengl.py
+deleted file mode 100644
+index 29b26a9..0000000
+--- a/upstream/examples/open_service/dtx/opengl.py
++++ /dev/null
+@@ -1,27 +0,0 @@
+-import sys
+-
+-import frida
+-
+-
+-def on_message(message):
+-    print("on_message:", message)
+-
+-
+-device = frida.get_usb_device()
+-
+-opengl = device.open_service("dtx:com.apple.instruments.server.services.graphics.opengl")
+-opengl.on("message", on_message)
+-opengl.request(
+-    {
+-        "method": "setSamplingRate:",
+-        "args": [5.0],
+-    }
+-)
+-opengl.request(
+-    {
+-        "method": "startSamplingAtTimeInterval:",
+-        "args": [0.0],
+-    }
+-)
+-
+-sys.stdin.read()
+diff --git a/upstream/examples/open_service/dtx/processcontrol.py b/upstream/examples/open_service/dtx/processcontrol.py
+deleted file mode 100644
+index 1c5bca6..0000000
+--- a/upstream/examples/open_service/dtx/processcontrol.py
++++ /dev/null
+@@ -1,31 +0,0 @@
+-import sys
+-
+-import frida
+-
+-
+-def on_message(message):
+-    print("on_message:", message)
+-
+-
+-device = frida.get_usb_device()
+-
+-control = device.open_service("dtx:com.apple.instruments.server.services.processcontrol")
+-control.on("message", on_message)
+-pid = control.request(
+-    {
+-        "method": "launchSuspendedProcessWithDevicePath:bundleIdentifier:environment:arguments:options:",
+-        "args": [
+-            "",
+-            "no.oleavr.HelloIOS",
+-            {},
+-            [],
+-            {
+-                "StartSuspendedKey": False,
+-            },
+-        ],
+-    }
+-)
+-control.request({"method": "startObservingPid:", "args": [pid]})
+-
+-print(f"App spawned, PID: {pid}.  Kill it to see an example message being emitted.")
+-sys.stdin.read()
+diff --git a/upstream/examples/open_service/dtx/screenshot.py b/upstream/examples/open_service/dtx/screenshot.py
+deleted file mode 100644
+index 12022af..0000000
+--- a/upstream/examples/open_service/dtx/screenshot.py
++++ /dev/null
+@@ -1,15 +0,0 @@
+-import sys
+-
+-import frida
+-
+-if len(sys.argv) != 2:
+-    print(f"Usage: {sys.argv[0]} outfile.png", file=sys.stderr)
+-    sys.exit(1)
+-outfile = sys.argv[1]
+-
+-device = frida.get_usb_device()
+-
+-screenshot = device.open_service("dtx:com.apple.instruments.server.services.screenshot")
+-png = screenshot.request({"method": "takeScreenshot"})
+-with open(outfile, "wb") as f:
+-    f.write(png)
+diff --git a/upstream/examples/open_service/dtx/sysmontap.py b/upstream/examples/open_service/dtx/sysmontap.py
+deleted file mode 100644
+index 7ad47b6..0000000
+--- a/upstream/examples/open_service/dtx/sysmontap.py
++++ /dev/null
+@@ -1,29 +0,0 @@
+-import time
+-
+-import frida
+-
+-
+-def on_message(message):
+-    print("on_message:", message)
+-
+-
+-device = frida.get_usb_device()
+-
+-sysmon = device.open_service("dtx:com.apple.instruments.server.services.sysmontap")
+-sysmon.on("message", on_message)
+-sysmon.request(
+-    {
+-        "method": "setConfig:",
+-        "args": [
+-            {
+-                "ur": 1000,
+-                "cpuUsage": True,
+-                "sampleInterval": 1000000000,
+-            },
+-        ],
+-    }
+-)
+-sysmon.request({"method": "start"})
+-time.sleep(5)
+-sysmon.request({"method": "stop"})
+-time.sleep(1)
+diff --git a/upstream/examples/open_service/plist.py b/upstream/examples/open_service/plist.py
+deleted file mode 100644
+index a2927e1..0000000
+--- a/upstream/examples/open_service/plist.py
++++ /dev/null
+@@ -1,7 +0,0 @@
+-import frida
+-
+-device = frida.get_usb_device()
+-
+-diag = device.open_service("plist:com.apple.mobile.diagnostics_relay")
+-diag.request({"type": "query", "payload": {"Request": "Sleep", "WaitForDisconnect": True}})
+-diag.request({"type": "query", "payload": {"Request": "Goodbye"}})
+diff --git a/upstream/examples/open_service/xpc/launchapplication.py b/upstream/examples/open_service/xpc/launchapplication.py
+deleted file mode 100644
+index 53f2e75..0000000
+--- a/upstream/examples/open_service/xpc/launchapplication.py
++++ /dev/null
+@@ -1,64 +0,0 @@
+-import pprint
+-import sys
+-from threading import Thread
+-
+-import frida
+-
+-
+-def main():
+-    device = frida.get_usb_device()
+-
+-    stdout_uuid, stdout_stream = create_stdio_socket(device)
+-    stderr_uuid, stderr_stream = create_stdio_socket(device)
+-
+-    appservice = device.open_service("xpc:com.apple.coredevice.appservice")
+-    response = appservice.request(
+-        {
+-            "CoreDevice.featureIdentifier": "com.apple.coredevice.feature.launchapplication",
+-            "CoreDevice.action": {},
+-            "CoreDevice.input": {
+-                "applicationSpecifier": {
+-                    "bundleIdentifier": {"_0": "no.oleavr.HelloIOS"},
+-                },
+-                "options": {
+-                    "arguments": [],
+-                    "environmentVariables": {},
+-                    "standardIOUsesPseudoterminals": True,
+-                    "startStopped": False,
+-                    "terminateExisting": True,
+-                    "user": {"active": True},
+-                    "platformSpecificOptions": b'<?xml version="1.0" encoding="UTF-8"?><plist version="1.0"><dict/></plist>',
+-                },
+-                "standardIOIdentifiers": {
+-                    "standardOutput": ("uuid", stdout_uuid),
+-                    "standardError": ("uuid", stderr_uuid),
+-                },
+-            },
+-        }
+-    )
+-    pprint.pp(response)
+-
+-    workers = set()
+-    for stream, sink in {(stdout_stream, sys.stdout), (stderr_stream, sys.stderr)}:
+-        t = Thread(target=process_console_output, args=(stream, sink))
+-        t.start()
+-        workers.add(t)
+-    for worker in workers:
+-        worker.join()
+-
+-
+-def create_stdio_socket(device):
+-    stream = device.open_channel("tcp:com.apple.coredevice.openstdiosocket")
+-    return (stream.read_all(16), stream)
+-
+-
+-def process_console_output(stream, sink):
+-    while True:
+-        chunk = stream.read(4096)
+-        if not chunk:
+-            break
+-        sink.write(chunk.decode("utf-8"))
+-
+-
+-if __name__ == "__main__":
+-    main()
+diff --git a/upstream/examples/open_service/xpc/listprocesses.py b/upstream/examples/open_service/xpc/listprocesses.py
+deleted file mode 100644
+index 4395051..0000000
+--- a/upstream/examples/open_service/xpc/listprocesses.py
++++ /dev/null
+@@ -1,15 +0,0 @@
+-import pprint
+-
+-import frida
+-
+-device = frida.get_usb_device()
+-
+-appservice = device.open_service("xpc:com.apple.coredevice.appservice")
+-response = appservice.request(
+-    {
+-        "CoreDevice.featureIdentifier": "com.apple.coredevice.feature.listprocesses",
+-        "CoreDevice.action": {},
+-        "CoreDevice.input": {},
+-    }
+-)
+-pprint.pp(response)
+diff --git a/fork/examples/spawn_gating.py b/fork/examples/spawn_gating.py
+new file mode 100644
+index 0000000..297dcec
+--- /dev/null
++++ b/fork/examples/spawn_gating.py
+@@ -0,0 +1,80 @@
++import threading
++
++from frida_tools.application import Reactor
++
++import frida
++
++
++class Application:
++    def __init__(self):
++        self._stop_requested = threading.Event()
++        self._reactor = Reactor(run_until_return=lambda reactor: self._stop_requested.wait())
++
++        self._device = frida.get_usb_device()
++        self._sessions = set()
++        self._sessions_lock = threading.Lock()
++
++        self._device.on("spawn-added", lambda spawn: self._reactor.schedule(lambda: self._on_spawn_added(spawn)))
++        self._device.on("spawn-removed", lambda spawn: self._reactor.schedule(lambda: self._on_spawn_removed(spawn)))
++
++    def run(self):
++        self._reactor.schedule(lambda: self._start())
++        self._reactor.run()
++
++    def _start(self):
++        self._device.enable_spawn_gating()
++
++    def _instrument(self, pid):
++        print(f"✔ attach(pid={pid})")
++        session = self._device.attach(pid)
++        session.on("detached", lambda reason: self._reactor.schedule(lambda: self._on_detached(pid, session, reason)))
++        print("✔ create_script()")
++        script = session.create_script(
++            """\
++const puts = new NativeFunction(Module.getGlobalExportByName('puts'), 'int', ['pointer']);
++puts(Memory.allocUtf8String('Hello from Frida agent'));
++Interceptor.attach(Module.getGlobalExportByName('open'), {
++  onEnter(args) {
++    send({
++      type: 'open',
++      path: args[0].readUtf8String()
++    });
++  }
++});
++"""
++        )
++        script.on("message", lambda message, data: self._reactor.schedule(lambda: self._on_message(pid, message)))
++        print("✔ load()")
++        script.load()
++        print(f"✔ resume(pid={pid})")
++        self._device.resume(pid)
++        with self._sessions_lock:
++            self._sessions.add(session)
++
++    def _on_spawn_added(self, spawn):
++        print(f"⚡ spawn_added: {spawn}")
++        t = threading.Thread(target=self._handle_spawn, args=(spawn,))
++        t.start()
++
++    def _handle_spawn(self, spawn):
++        if "/bin/ls" in spawn.identifier:
++            self._instrument(spawn.pid)
++        else:
++            pid = spawn.pid
++            print(f"✔ resume(pid={pid})")
++            self._device.resume(pid)
++
++    def _on_spawn_removed(self, spawn):
++        print(f"⚡ spawn_removed: {spawn}")
++
++    def _on_detached(self, pid, session, reason):
++        print(f"⚡ detached: pid={pid}, reason='{reason}'")
++        with self._sessions_lock:
++            self._sessions.remove(session)
++
++    def _on_message(self, pid, message):
++        print(f"⚡ message: pid={pid}, payload={message['payload']}")
++
++
++app = Application()
++app.run()
+diff --git a/upstream/frida/__init__.py b/fork/frida/__init__.py
+index a8af9ae..46cf817 100644
+--- a/upstream/frida/__init__.py
++++ b/fork/frida/__init__.py
+@@ -1,4 +1,4 @@
+-from typing import Any, Callable, Dict, List, Optional, Tuple, Union
++from typing import Any, Callable, Dict, List, Optional, Sequence, Tuple, Union
+ 
+ try:
+     from . import _frida
+@@ -23,6 +23,7 @@ Relay = _frida.Relay
+ PortalService = core.PortalService
+ EndpointParameters = core.EndpointParameters
+ Compiler = core.Compiler
++PackageManager = core.PackageManager
+ FileMonitor = _frida.FileMonitor
+ Cancellable = core.Cancellable
+ 
+@@ -85,14 +86,30 @@ def kill(target: core.ProcessTarget) -> None:
+ 
+ 
+ def attach(
+-    target: core.ProcessTarget, realm: Optional[str] = None, persist_timeout: Optional[int] = None
++    target: core.ProcessTarget,
++    realm: Optional[str] = None,
++    persist_timeout: Optional[int] = None,
++    exceptor: Optional[str] = None,
++    unwind_broker: Optional[bool] = None,
++    exit_monitor: Optional[bool] = None,
++    thread_suspend_monitor: Optional[bool] = None,
++    linker_notifier_offsets: Optional[Sequence[int]] = None,
+ ) -> core.Session:
+     """
+     Attach to a process
+     :param target: the PID or name of the process
+     """
+ 
+-    return get_local_device().attach(target, realm=realm, persist_timeout=persist_timeout)
++    return get_local_device().attach(
++        target,
++        realm=realm,
++        persist_timeout=persist_timeout,
++        exceptor=exceptor,
++        unwind_broker=unwind_broker,
++        exit_monitor=exit_monitor,
++        thread_suspend_monitor=thread_suspend_monitor,
++        linker_notifier_offsets=linker_notifier_offsets,
++    )
+ 
+ 
+ def inject_library_file(target: core.ProcessTarget, path: str, entrypoint: str, data: str) -> int:
+diff --git a/upstream/frida/_frida/__init__.pyi b/fork/frida/_frida/__init__.pyi
+index c2d3a9b..618e2e1 100644
+--- a/upstream/frida/_frida/__init__.pyi
++++ b/fork/frida/_frida/__init__.pyi
+@@ -256,7 +256,17 @@ class Device(Object):
+         """
+         ...
+ 
+-    def attach(self, pid: int, realm: Optional[str] = None, persist_timeout: Optional[int] = None) -> "Session":
++    def attach(
++        self,
++        pid: int,
++        realm: Optional[str] = None,
++        persist_timeout: Optional[int] = None,
++        exceptor: Optional[str] = None,
++        unwind_broker: Optional[bool] = None,
++        exit_monitor: Optional[bool] = None,
++        thread_suspend_monitor: Optional[bool] = None,
++        linker_notifier_offsets: Optional[Sequence[int]] = None,
++    ) -> "Session":
+         """
+         Attach to a PID.
+         """
+@@ -354,6 +364,12 @@ class Device(Object):
+         """
+         ...
+ 
++    def override_option(self, name: str, value: Any) -> None:
++        """
++        Override a backend-specific option.
++        """
++        ...
++
+     def query_system_parameters(self) -> Dict[str, Any]:
+         """
+         Returns a dictionary of information about the host system.
+@@ -611,6 +627,12 @@ class Script(Object):
+         """
+         ...
+ 
++    def interrupt(self) -> None:
++        """
++        Interrupt any JavaScript currently executing in the script.
++        """
++        ...
++
+     def post(self, message: str, data: Optional[Union[str, bytes]] = None) -> None:
+         """
+         Post a JSON-encoded message to the script.
+@@ -623,6 +645,12 @@ class Script(Object):
+         """
+         ...
+ 
++    def terminate(self) -> None:
++        """
++        Interrupt execution and unload the script.
++        """
++        ...
++
+     def enable_debugger(self, port: Optional[int]) -> None:
+         """
+         Enable the Node.js compatible script debugger
+@@ -754,8 +782,13 @@ class Compiler(Object):
+         self,
+         entrypoint: str,
+         project_root: Optional[str] = None,
++        output_format: Optional[str] = None,
++        bundle_format: Optional[str] = None,
++        type_check: Optional[str] = None,
+         source_maps: Optional[str] = None,
+         compression: Optional[str] = None,
++        platform: Optional[str] = None,
++        externals: Optional[Sequence[str]] = None,
+     ) -> str:
+         """
+         Build an agent.
+@@ -766,12 +799,107 @@ class Compiler(Object):
+         self,
+         entrypoint: str,
+         project_root: Optional[str] = None,
++        output_format: Optional[str] = None,
++        bundle_format: Optional[str] = None,
++        type_check: Optional[str] = None,
+         source_maps: Optional[str] = None,
+         compression: Optional[str] = None,
++        platform: Optional[str] = None,
++        externals: Optional[Sequence[str]] = None,
+     ) -> None:
+         """
+         Continuously build an agent.
+         """
+         ...
+ 
++class PackageManager(Object):
++    @property
++    def registry(self) -> str:
++        """
++        The registry being used.
++        """
++        ...
++
++    @registry.setter
++    def registry(self, value: str) -> None:
++        """
++        Change the registry to use.
++        """
++        ...
++
++    def search(
++        self,
++        query: str,
++        offset: Optional[int] = None,
++        limit: Optional[int] = None,
++    ) -> PackageSearchResult:
++        """
++        Search for packages to install.
++        """
++        ...
++
++    def install(
++        self,
++        project_root: Optional[str] = None,
++        role: Optional[str] = None,
++        specs: Optional[Sequence[str]] = None,
++        omits: Optional[Sequence[str]] = None,
++    ) -> PackageInstallResult:
++        """
++        Install one or more packages.
++        """
++        ...
++
++class Package(Object):
++    @property
++    def name(self) -> str:
++        """
++        Package name.
++        """
++        ...
++
++    @property
++    def version(self) -> str:
++        """
++        Package version.
++        """
++        ...
++
++    @property
++    def description(self) -> Optional[str]:
++        """
++        Package description.
++        """
++        ...
++
++    @property
++    def url(self) -> Optional[str]:
++        """
++        Package URL.
++        """
++        ...
++
++class PackageSearchResult(Object):
++    @property
++    def packages(self) -> List[Package]:
++        """
++        Batch of matching packages.
++        """
++        ...
++
++    @property
++    def total(self) -> int:
++        """
++        Total matching packages.
++        """
++        ...
++
++class PackageInstallResult(Object):
++    @property
++    def packages(self) -> List[Package]:
++        """
++        The toplevel packages that are installed.
++        """
++        ...
++
+ __version__: str
+diff --git a/upstream/frida/_frida/extension.c b/fork/frida/_frida/extension.c
+index ee5b9ce..58ca6b0 100644
+--- a/upstream/frida/_frida/extension.c
++++ b/fork/frida/_frida/extension.c
+@@ -1,5 +1,5 @@
+ /*
+- * Copyright (C) 2013-2023 Ole André Vadla Ravnås <oleavr@nowsecure.com>
++ * Copyright (C) 2013-2026 Ole André Vadla Ravnås <oleavr@nowsecure.com>
+  * Copyright (C) 2024 Håvard Sørbø <havard@hsorbo.no>
+  *
+  * Licence: wxWindows Library Licence, Version 3.1
+@@ -145,6 +145,10 @@ typedef struct _PyPortalMembership             PyPortalMembership;
+ typedef struct _PyPortalService                PyPortalService;
+ typedef struct _PyEndpointParameters           PyEndpointParameters;
+ typedef struct _PyCompiler                     PyCompiler;
++typedef struct _PyPackageManager               PyPackageManager;
++typedef struct _PyPackage                      PyPackage;
++typedef struct _PyPackageSearchResult          PyPackageSearchResult;
++typedef struct _PyPackageInstallResult         PyPackageInstallResult;
+ typedef struct _PyFileMonitor                  PyFileMonitor;
+ typedef struct _PyIOStream                     PyIOStream;
+ typedef struct _PyCancellable                  PyCancellable;
+@@ -298,6 +302,33 @@ struct _PyCompiler
+   PyGObject parent;
+ };
+ 
++struct _PyPackageManager
++{
++  PyGObject parent;
++};
++
++struct _PyPackage
++{
++  PyGObject parent;
++  PyObject * name;
++  PyObject * version;
++  PyObject * description;
++  PyObject * url;
++};
++
++struct _PyPackageSearchResult
++{
++  PyGObject parent;
++  PyObject * packages;
++  guint total;
++};
++
++struct _PyPackageInstallResult
++{
++  PyGObject parent;
++  PyObject * packages;
++};
++
+ struct _PyFileMonitor
+ {
+   PyGObject parent;
+@@ -347,6 +378,7 @@ static PyObject * PyGObject_marshal_variant (GVariant * variant);
+ static PyObject * PyGObject_marshal_variant_byte_array (GVariant * variant);
+ static PyObject * PyGObject_marshal_variant_dict (GVariant * variant);
+ static PyObject * PyGObject_marshal_variant_array (GVariant * variant);
++static PyObject * PyGObject_marshal_variant_tuple (GVariant * variant);
+ static gboolean PyGObject_unmarshal_variant (PyObject * value, GVariant ** variant);
+ static gboolean PyGObject_unmarshal_variant_from_mapping (PyObject * mapping, GVariant ** variant);
+ static gboolean PyGObject_unmarshal_variant_from_sequence (PyObject * sequence, GVariant ** variant);
+@@ -372,6 +404,7 @@ static void PyDevice_init_from_handle (PyDevice * self, FridaDevice * handle);
+ static void PyDevice_dealloc (PyDevice * self);
+ static PyObject * PyDevice_repr (PyDevice * self);
+ static PyObject * PyDevice_is_lost (PyDevice * self);
++static PyObject * PyDevice_override_option (PyDevice * self, PyObject * args, PyObject * kw);
+ static PyObject * PyDevice_query_system_parameters (PyDevice * self);
+ static PyObject * PyDevice_get_frontmost_application (PyDevice * self, PyObject * args, PyObject * kw);
+ static PyObject * PyDevice_enumerate_applications (PyDevice * self, PyObject * args, PyObject * kw);
+@@ -387,7 +420,7 @@ static PyObject * PyDevice_input (PyDevice * self, PyObject * args);
+ static PyObject * PyDevice_resume (PyDevice * self, PyObject * args);
+ static PyObject * PyDevice_kill (PyDevice * self, PyObject * args);
+ static PyObject * PyDevice_attach (PyDevice * self, PyObject * args, PyObject * kw);
+-static FridaSessionOptions * PyDevice_parse_session_options (const gchar * realm_value, guint persist_timeout);
++static FridaSessionOptions * PyDevice_parse_session_options (const gchar * realm_value, guint persist_timeout, const gchar * exceptor_value, gint unwind_broker, gint exit_monitor, gint thread_suspend_monitor, PyObject * linker_notifier_offsets_value);
+ static PyObject * PyDevice_inject_library_file (PyDevice * self, PyObject * args);
+ static PyObject * PyDevice_inject_library_blob (PyDevice * self, PyObject * args);
+ static PyObject * PyDevice_open_channel (PyDevice * self, PyObject * args);
+@@ -459,7 +492,9 @@ static FridaPortalOptions * PySession_parse_portal_options (const gchar * certif
+ static PyObject * PyScript_new_take_handle (FridaScript * handle);
+ static PyObject * PyScript_is_destroyed (PyScript * self);
+ static PyObject * PyScript_load (PyScript * self);
++static PyObject * PyScript_interrupt (PyScript * self);
+ static PyObject * PyScript_unload (PyScript * self);
++static PyObject * PyScript_terminate (PyScript * self);
+ static PyObject * PyScript_eternalize (PyScript * self);
+ static PyObject * PyScript_post (PyScript * self, PyObject * args, PyObject * kw);
+ static PyObject * PyScript_enable_debugger (PyScript * self, PyObject * args, PyObject * kw);
+@@ -498,12 +533,43 @@ static gchar * frida_python_authentication_service_authenticate_finish (FridaAut
+ static void frida_python_authentication_service_do_authenticate (GTask * task, FridaPythonAuthenticationService * self);
+ 
+ static int PyCompiler_init (PyCompiler * self, PyObject * args, PyObject * kw);
++static void PyCompiler_dealloc (PyCompiler * self);
+ static PyObject * PyCompiler_build (PyCompiler * self, PyObject * args, PyObject * kw);
+ static PyObject * PyCompiler_watch (PyCompiler * self, PyObject * args, PyObject * kw);
+-static gboolean PyCompiler_set_options (FridaCompilerOptions * options, const gchar * project_root_value, const gchar * source_maps_value,
+-    const gchar * compression_value);
++static gboolean PyCompiler_set_options (FridaCompilerOptions * options, const gchar * project_root_value, const gchar * output_format_value,
++    const gchar * bundle_format_value, const gchar * type_check_value, const gchar * source_maps_value, const gchar * compression_value,
++    const gchar * platform_value, PyObject * externals_value);
++
++static int PyPackageManager_init (PyPackageManager * self, PyObject * args, PyObject * kw);
++static void PyPackageManager_dealloc (PyPackageManager * self);
++static PyObject * PyPackageManager_repr (PyPackageManager * self);
++static PyObject * PyPackageManager_get_registry (PyPackageManager * self, void * closure);
++static int PyPackageManager_set_registry (PyPackageManager * self, PyObject * val, void * closure);
++static PyObject * PyPackageManager_search (PyPackageManager * self, PyObject * args, PyObject * kw);
++static PyObject * PyPackageManager_install (PyPackageManager * self, PyObject * args, PyObject * kw);
++static FridaPackageInstallOptions * PyPackageManager_parse_install_options (const gchar * project_root, const char * role_value,
++    PyObject * specs_value, PyObject * omits_value);
++
++static PyObject * PyPackage_new_take_handle (FridaPackage * handle);
++static int PyPackage_init (PyPackage * self, PyObject * args, PyObject * kw);
++static void PyPackage_init_from_handle (PyPackage * self, FridaPackage * handle);
++static void PyPackage_dealloc (PyPackage * self);
++static PyObject * PyPackage_repr (PyPackage * self);
++
++static PyObject * PyPackageSearchResult_new_take_handle (FridaPackageSearchResult * handle);
++static int PyPackageSearchResult_init (PyPackageSearchResult * self, PyObject * args, PyObject * kw);
++static void PyPackageSearchResult_init_from_handle (PyPackageSearchResult * self, FridaPackageSearchResult * handle);
++static void PyPackageSearchResult_dealloc (PyPackageSearchResult * self);
++static PyObject * PyPackageSearchResult_repr (PyPackageSearchResult * self);
++
++static PyObject * PyPackageInstallResult_new_take_handle (FridaPackageInstallResult * handle);
++static int PyPackageInstallResult_init (PyPackageInstallResult * self, PyObject * args, PyObject * kw);
++static void PyPackageInstallResult_init_from_handle (PyPackageInstallResult * self, FridaPackageInstallResult * handle);
++static void PyPackageInstallResult_dealloc (PyPackageInstallResult * self);
++static PyObject * PyPackageInstallResult_repr (PyPackageInstallResult * self);
+ 
+ static int PyFileMonitor_init (PyFileMonitor * self, PyObject * args, PyObject * kw);
++static void PyFileMonitor_dealloc (PyFileMonitor * self);
+ static PyObject * PyFileMonitor_enable (PyFileMonitor * self);
+ static PyObject * PyFileMonitor_disable (PyFileMonitor * self);
+ 
+@@ -557,6 +623,7 @@ static PyMethodDef PyDeviceManager_methods[] =
+ static PyMethodDef PyDevice_methods[] =
+ {
+   { "is_lost", (PyCFunction) PyDevice_is_lost, METH_NOARGS, "Query whether the device has been lost." },
++  { "override_option", (PyCFunction) PyDevice_override_option, METH_VARARGS | METH_KEYWORDS, "Override a backend-specific option." },
+   { "query_system_parameters", (PyCFunction) PyDevice_query_system_parameters, METH_NOARGS, "Returns a dictionary of information about the host system." },
+   { "get_frontmost_application", (PyCFunction) PyDevice_get_frontmost_application, METH_VARARGS | METH_KEYWORDS, "Get details about the frontmost application." },
+   { "enumerate_applications", (PyCFunction) PyDevice_enumerate_applications, METH_VARARGS | METH_KEYWORDS, "Enumerate applications." },
+@@ -675,7 +742,9 @@ static PyMethodDef PyScript_methods[] =
+ {
+   { "is_destroyed", (PyCFunction) PyScript_is_destroyed, METH_NOARGS, "Query whether the script has been destroyed." },
+   { "load", (PyCFunction) PyScript_load, METH_NOARGS, "Load the script." },
++  { "interrupt", (PyCFunction) PyScript_interrupt, METH_NOARGS, "Interrupt any JavaScript currently executing in the script." },
+   { "unload", (PyCFunction) PyScript_unload, METH_NOARGS, "Unload the script." },
++  { "terminate", (PyCFunction) PyScript_terminate, METH_NOARGS, "Interrupt execution and unload the script." },
+   { "eternalize", (PyCFunction) PyScript_eternalize, METH_NOARGS, "Eternalize the script." },
+   { "post", (PyCFunction) PyScript_post, METH_VARARGS | METH_KEYWORDS, "Post a JSON-encoded message to the script." },
+   { "enable_debugger", (PyCFunction) PyScript_enable_debugger, METH_VARARGS | METH_KEYWORDS, "Enable the Node.js compatible script debugger." },
+@@ -725,6 +794,41 @@ static PyMethodDef PyCompiler_methods[] =
+   { NULL }
+ };
+ 
++static PyGetSetDef PyPackageManager_getset[] =
++{
++  { "registry", (getter) PyPackageManager_get_registry, (setter) PyPackageManager_set_registry, "The registry to use.", NULL },
++  { NULL }
++};
++
++static PyMethodDef PyPackageManager_methods[] =
++{
++  { "search", (PyCFunction) PyPackageManager_search, METH_VARARGS | METH_KEYWORDS, "Search for packages to install." },
++  { "install", (PyCFunction) PyPackageManager_install, METH_VARARGS | METH_KEYWORDS, "Install one or more packages." },
++  { NULL }
++};
++
++static PyMemberDef PyPackage_members[] =
++{
++  { "name", T_OBJECT_EX, G_STRUCT_OFFSET (PyPackage, name), READONLY, "Package name." },
++  { "version", T_OBJECT_EX, G_STRUCT_OFFSET (PyPackage, version), READONLY, "Package version." },
++  { "description", T_OBJECT_EX, G_STRUCT_OFFSET (PyPackage, description), READONLY, "Package description." },
++  { "url", T_OBJECT_EX, G_STRUCT_OFFSET (PyPackage, url), READONLY, "Package URL." },
++  { NULL }
++};
++
++static PyMemberDef PyPackageSearchResult_members[] =
++{
++  { "packages", T_OBJECT_EX, G_STRUCT_OFFSET (PyPackageSearchResult, packages), READONLY, "Batch of matching packages." },
++  { "total", T_UINT, G_STRUCT_OFFSET (PyPackageSearchResult, total), READONLY, "Total matching packages." },
++  { NULL }
++};
++
++static PyMemberDef PyPackageInstallResult_members[] =
++{
++  { "packages", T_OBJECT_EX, G_STRUCT_OFFSET (PyPackageInstallResult, packages), READONLY, "The toplevel packages that are installed." },
++  { NULL }
++};
++
+ static PyMethodDef PyFileMonitor_methods[] =
+ {
+   { "enable", (PyCFunction) PyFileMonitor_enable, METH_NOARGS, "Enable the file monitor." },
+@@ -871,14 +975,49 @@ PYFRIDA_DEFINE_TYPE ("_frida.EndpointParameters", EndpointParameters, GObject, N
+ );
+ 
+ PYFRIDA_DEFINE_TYPE ("_frida.Compiler", Compiler, GObject, NULL, frida_unref,
+-  { Py_tp_doc, "Frida File Monitor" },
++  { Py_tp_doc, "Frida Compiler" },
+   { Py_tp_init, PyCompiler_init },
++  { Py_tp_dealloc, PyCompiler_dealloc },
+   { Py_tp_methods, PyCompiler_methods },
+ );
+ 
++PYFRIDA_DEFINE_TYPE ("_frida.PackageManager", PackageManager, GObject, NULL, frida_unref,
++  { Py_tp_doc, "Frida Package Manager" },
++  { Py_tp_init, PyPackageManager_init },
++  { Py_tp_dealloc, PyPackageManager_dealloc },
++  { Py_tp_repr, PyPackageManager_repr },
++  { Py_tp_getset, PyPackageManager_getset },
++  { Py_tp_methods, PyPackageManager_methods },
++);
++
++PYFRIDA_DEFINE_TYPE ("_frida.Package", Package, GObject, PyPackage_init_from_handle, g_object_unref,
++  { Py_tp_doc, "Frida Package" },
++  { Py_tp_init, PyPackage_init },
++  { Py_tp_dealloc, PyPackage_dealloc },
++  { Py_tp_repr, PyPackage_repr },
++  { Py_tp_members, PyPackage_members },
++);
++
++PYFRIDA_DEFINE_TYPE ("_frida.PackageSearchResult", PackageSearchResult, GObject, PyPackageSearchResult_init_from_handle, g_object_unref,
++  { Py_tp_doc, "Frida Package Search Result" },
++  { Py_tp_init, PyPackageSearchResult_init },
++  { Py_tp_dealloc, PyPackageSearchResult_dealloc },
++  { Py_tp_repr, PyPackageSearchResult_repr },
++  { Py_tp_members, PyPackageSearchResult_members },
++);
++
++PYFRIDA_DEFINE_TYPE ("_frida.PackageInstallResult", PackageInstallResult, GObject, PyPackageInstallResult_init_from_handle, g_object_unref,
++  { Py_tp_doc, "Frida Package Install Result" },
++  { Py_tp_init, PyPackageInstallResult_init },
++  { Py_tp_dealloc, PyPackageInstallResult_dealloc },
++  { Py_tp_repr, PyPackageInstallResult_repr },
++  { Py_tp_members, PyPackageInstallResult_members },
++);
++
+ PYFRIDA_DEFINE_TYPE ("_frida.FileMonitor", FileMonitor, GObject, NULL, frida_unref,
+   { Py_tp_doc, "Frida File Monitor" },
+   { Py_tp_init, PyFileMonitor_init },
++  { Py_tp_dealloc, PyFileMonitor_dealloc },
+   { Py_tp_methods, PyFileMonitor_methods },
+ );
+ 
+@@ -1617,10 +1756,20 @@ PyGObject_marshal_variant (GVariant * variant)
+   {
+     case G_VARIANT_CLASS_STRING:
+       return PyGObject_marshal_string (g_variant_get_string (variant, NULL));
++    case G_VARIANT_CLASS_BYTE:
++      return PyLong_FromLong (g_variant_get_byte (variant));
++    case G_VARIANT_CLASS_INT16:
++      return PyLong_FromLong (g_variant_get_int16 (variant));
++    case G_VARIANT_CLASS_UINT16:
++      return PyLong_FromUnsignedLong (g_variant_get_uint16 (variant));
++    case G_VARIANT_CLASS_INT32:
++      return PyLong_FromLong (g_variant_get_int32 (variant));
++    case G_VARIANT_CLASS_UINT32:
++      return PyLong_FromUnsignedLong (g_variant_get_uint32 (variant));
+     case G_VARIANT_CLASS_INT64:
+       return PyLong_FromLongLong (g_variant_get_int64 (variant));
+     case G_VARIANT_CLASS_UINT64:
+-      return PyLong_FromLongLong (g_variant_get_uint64 (variant));
++      return PyLong_FromUnsignedLongLong (g_variant_get_uint64 (variant));
+     case G_VARIANT_CLASS_DOUBLE:
+       return PyFloat_FromDouble (g_variant_get_double (variant));
+     case G_VARIANT_CLASS_BOOLEAN:
+@@ -1633,6 +1782,19 @@ PyGObject_marshal_variant (GVariant * variant)
+         return PyGObject_marshal_variant_dict (variant);
+ 
+       return PyGObject_marshal_variant_array (variant);
++    case G_VARIANT_CLASS_TUPLE:
++      return PyGObject_marshal_variant_tuple (variant);
++    case G_VARIANT_CLASS_VARIANT:
++    {
++      GVariant * inner;
++      PyObject * result;
++
++      inner = g_variant_get_variant (variant);
++      result = PyGObject_marshal_variant (inner);
++      g_variant_unref (inner);
++
++      return result;
++    }
+     default:
+       break;
+   }
+@@ -1691,13 +1853,6 @@ PyGObject_marshal_variant_array (GVariant * variant)
+ 
+   for (i = 0; (child = g_variant_iter_next_value (&iter)) != NULL; i++)
+   {
+-    if (g_variant_is_of_type (child, G_VARIANT_TYPE_VARIANT))
+-    {
+-      GVariant * inner = g_variant_get_variant (child);
+-      g_variant_unref (child);
+-      child = inner;
+-    }
+-
+     PyList_SetItem (list, i, PyGObject_marshal_variant (child));
+ 
+     g_variant_unref (child);
+@@ -1706,6 +1861,28 @@ PyGObject_marshal_variant_array (GVariant * variant)
+   return list;
+ }
+ 
++static PyObject *
++PyGObject_marshal_variant_tuple (GVariant * variant)
++{
++  GVariantIter iter;
++  PyObject * tuple;
++  guint i;
++  GVariant * child;
++
++  g_variant_iter_init (&iter, variant);
++
++  tuple = PyTuple_New (g_variant_iter_n_children (&iter));
++
++  for (i = 0; (child = g_variant_iter_next_value (&iter)) != NULL; i++)
++  {
++    PyTuple_SetItem (tuple, i, PyGObject_marshal_variant (child));
++
++    g_variant_unref (child);
++  }
++
++  return tuple;
++}
++
+ static gboolean
+ PyGObject_unmarshal_variant (PyObject * value, GVariant ** variant)
+ {
+@@ -1715,14 +1892,14 @@ PyGObject_unmarshal_variant (PyObject * value, GVariant ** variant)
+ 
+     PyGObject_unmarshal_string (value, &str);
+ 
+-    *variant = g_variant_new_take_string (str);
++    *variant = g_variant_ref_sink (g_variant_new_take_string (str));
+ 
+     return TRUE;
+   }
+ 
+   if (PyBool_Check (value))
+   {
+-    *variant = g_variant_new_boolean (value == Py_True);
++    *variant = g_variant_ref_sink (g_variant_new_boolean (value == Py_True));
+ 
+     return TRUE;
+   }
+@@ -1735,14 +1912,14 @@ PyGObject_unmarshal_variant (PyObject * value, GVariant ** variant)
+     if (l == -1 && PyErr_Occurred ())
+       return FALSE;
+ 
+-    *variant = g_variant_new_int64 (l);
++    *variant = g_variant_ref_sink (g_variant_new_int64 (l));
+ 
+     return TRUE;
+   }
+ 
+   if (PyFloat_Check (value))
+   {
+-    *variant = g_variant_new_double (PyFloat_AsDouble (value));
++    *variant = g_variant_ref_sink (g_variant_new_double (PyFloat_AsDouble (value)));
+ 
+     return TRUE;
+   }
+@@ -1756,7 +1933,7 @@ PyGObject_unmarshal_variant (PyObject * value, GVariant ** variant)
+     PyBytes_AsStringAndSize (value, &buffer, &length);
+ 
+     copy = g_memdup2 (buffer, length);
+-    *variant = g_variant_new_from_data (G_VARIANT_TYPE_BYTESTRING, copy, length, TRUE, g_free, copy);
++    *variant = g_variant_ref_sink (g_variant_new_from_data (G_VARIANT_TYPE_BYTESTRING, copy, length, TRUE, g_free, copy));
+ 
+     return TRUE;
+   }
+@@ -1802,12 +1979,13 @@ PyGObject_unmarshal_variant_from_mapping (PyObject * mapping, GVariant ** varian
+ 
+     g_variant_builder_add (&builder, "{sv}", PyBytes_AsString (key_bytes), raw_value);
+ 
++    g_variant_unref (raw_value);
+     Py_DecRef (key_bytes);
+   }
+ 
+   Py_DecRef (items);
+ 
+-  *variant = g_variant_builder_end (&builder);
++  *variant = g_variant_ref_sink (g_variant_builder_end (&builder));
+ 
+   return TRUE;
+ 
+@@ -1852,10 +2030,11 @@ PyGObject_unmarshal_variant_from_sequence (PyObject * sequence, GVariant ** vari
+     else
+       g_variant_builder_add (&builder, "v", raw_value);
+ 
++    g_variant_unref (raw_value);
+     Py_DecRef (val);
+   }
+ 
+-  *variant = g_variant_builder_end (&builder);
++  *variant = g_variant_ref_sink (g_variant_builder_end (&builder));
+ 
+   return TRUE;
+ 
+@@ -2323,6 +2502,33 @@ PyDevice_is_lost (PyDevice * self)
+   return PyBool_FromLong (is_lost);
+ }
+ 
++static PyObject *
++PyDevice_override_option (PyDevice * self, PyObject * args, PyObject * kw)
++{
++  static char * keywords[] = { "name", "value", NULL };
++  const char * name;
++  PyObject * value;
++  GVariant * raw_value;
++  GError * error = NULL;
++
++  if (!PyArg_ParseTupleAndKeywords (args, kw, "sO", keywords, &name, &value))
++    return NULL;
++
++  if (!PyGObject_unmarshal_variant (value, &raw_value))
++    return NULL;
++
++  Py_BEGIN_ALLOW_THREADS
++  frida_device_override_option (PY_GOBJECT_HANDLE (self), name, raw_value, &error);
++  Py_END_ALLOW_THREADS
++
++  g_variant_unref (raw_value);
++
++  if (error != NULL)
++    return PyFrida_raise (error);
++
++  PyFrida_RETURN_NONE;
++}
++
+ static PyObject *
+ PyDevice_query_system_parameters (PyDevice * self)
+ {
+@@ -2576,10 +2782,16 @@ static PyObject *
+ PyDevice_enable_spawn_gating (PyDevice * self)
+ {
+   GError * error = NULL;
++  FridaSpawnGatingOptions * options;
++
++  options = frida_spawn_gating_options_new ();
+ 
+   Py_BEGIN_ALLOW_THREADS
+-  frida_device_enable_spawn_gating_sync (PY_GOBJECT_HANDLE (self), g_cancellable_get_current (), &error);
++  frida_device_enable_spawn_gating_sync (PY_GOBJECT_HANDLE (self), options, g_cancellable_get_current (), &error);
+   Py_END_ALLOW_THREADS
++
++  g_object_unref (options);
++
+   if (error != NULL)
+     return PyFrida_raise (error);
+ 
+@@ -2755,7 +2967,7 @@ PyDevice_spawn (PyDevice * self, PyObject * args, PyObject * kw)
+         goto invalid_dict_value;
+       }
+ 
+-      g_hash_table_insert (aux, raw_key, g_variant_ref_sink (raw_value));
++      g_hash_table_insert (aux, raw_key, raw_value);
+     }
+   }
+ 
+@@ -2854,21 +3066,43 @@ static PyObject *
+ PyDevice_attach (PyDevice * self, PyObject * args, PyObject * kw)
+ {
+   PyObject * result = NULL;
+-  static char * keywords[] = { "pid", "realm", "persist_timeout", NULL };
++  static char * keywords[] = {
++    "pid",
++    "realm",
++    "persist_timeout",
++    "exceptor",
++    "unwind_broker",
++    "exit_monitor",
++    "thread_suspend_monitor",
++    "linker_notifier_offsets",
++    NULL
++  };
+   long pid;
+   char * realm_value = NULL;
+   unsigned int persist_timeout = 0;
++  char * exceptor_value = NULL;
++  int unwind_broker = -1;
++  int exit_monitor = -1;
++  int thread_suspend_monitor = -1;
++  PyObject * linker_notifier_offsets_value = NULL;
+   FridaSessionOptions * options = NULL;
+   GError * error = NULL;
+   FridaSession * handle;
+ 
+-  if (!PyArg_ParseTupleAndKeywords (args, kw, "l|esI", keywords,
++  if (!PyArg_ParseTupleAndKeywords (args, kw, "l|esIespppO", keywords,
+         &pid,
+         "utf-8", &realm_value,
+-        &persist_timeout))
++        &persist_timeout,
++        "utf-8", &exceptor_value,
++        &unwind_broker,
++        &exit_monitor,
++        &thread_suspend_monitor,
++        &linker_notifier_offsets_value))
+     return NULL;
+ 
+-  options = PyDevice_parse_session_options (realm_value, persist_timeout);
++  options = PyDevice_parse_session_options (realm_value, persist_timeout,
++      exceptor_value, unwind_broker, exit_monitor, thread_suspend_monitor,
++      linker_notifier_offsets_value);
+   if (options == NULL)
+     goto beach;
+ 
+@@ -2883,6 +3117,7 @@ PyDevice_attach (PyDevice * self, PyObject * args, PyObject * kw)
+ beach:
+   g_clear_object (&options);
+ 
++  PyMem_Free (exceptor_value);
+   PyMem_Free (realm_value);
+ 
+   return result;
+@@ -2890,7 +3125,12 @@ beach:
+ 
+ static FridaSessionOptions *
+ PyDevice_parse_session_options (const gchar * realm_value,
+-                                guint persist_timeout)
++                                guint persist_timeout,
++                                const gchar * exceptor_value,
++                                gint unwind_broker,
++                                gint exit_monitor,
++                                gint thread_suspend_monitor,
++                                PyObject * linker_notifier_offsets_value)
+ {
+   FridaSessionOptions * options;
+ 
+@@ -2908,6 +3148,50 @@ PyDevice_parse_session_options (const gchar * realm_value,
+ 
+   frida_session_options_set_persist_timeout (options, persist_timeout);
+ 
++  if (exceptor_value != NULL)
++  {
++    FridaExceptor exceptor;
++
++    if (!PyGObject_unmarshal_enum (exceptor_value, FRIDA_TYPE_EXCEPTOR, &exceptor))
++      goto propagate_error;
++
++    frida_session_options_set_exceptor (options, exceptor);
++  }
++
++  if (unwind_broker != -1)
++    frida_session_options_set_unwind_broker (options, unwind_broker);
++
++  if (exit_monitor != -1)
++    frida_session_options_set_exit_monitor (options, exit_monitor);
++
++  if (thread_suspend_monitor != -1)
++    frida_session_options_set_thread_suspend_monitor (options, thread_suspend_monitor);
++
++  if (linker_notifier_offsets_value != NULL)
++  {
++    gint n, i;
++
++    n = PySequence_Size (linker_notifier_offsets_value);
++    if (n == -1)
++      goto propagate_error;
++
++    for (i = 0; i != n; i++)
++    {
++      PyObject * element;
++      unsigned long offset;
++
++      element = PySequence_GetItem (linker_notifier_offsets_value, i);
++      if (element == NULL)
++        goto propagate_error;
++      offset = PyLong_AsUnsignedLong (element);
++      Py_DecRef (element);
++      if (offset == (unsigned long) -1 && PyErr_Occurred () != NULL)
++        goto propagate_error;
++
++      frida_session_options_add_linker_notifier_offset (options, offset);
++    }
++  }
++
+   return options;
+ 
+ propagate_error:
+@@ -4113,6 +4397,20 @@ PyScript_load (PyScript * self)
+   PyFrida_RETURN_NONE;
+ }
+ 
++static PyObject *
++PyScript_interrupt (PyScript * self)
++{
++  GError * error = NULL;
++
++  Py_BEGIN_ALLOW_THREADS
++  frida_script_interrupt_sync (PY_GOBJECT_HANDLE (self), g_cancellable_get_current (), &error);
++  Py_END_ALLOW_THREADS
++  if (error != NULL)
++    return PyFrida_raise (error);
++
++  PyFrida_RETURN_NONE;
++}
++
+ static PyObject *
+ PyScript_unload (PyScript * self)
+ {
+@@ -4127,6 +4425,20 @@ PyScript_unload (PyScript * self)
+   PyFrida_RETURN_NONE;
+ }
+ 
++static PyObject *
++PyScript_terminate (PyScript * self)
++{
++  GError * error = NULL;
++
++  Py_BEGIN_ALLOW_THREADS
++  frida_script_terminate_sync (PY_GOBJECT_HANDLE (self), g_cancellable_get_current (), &error);
++  Py_END_ALLOW_THREADS
++  if (error != NULL)
++    return PyFrida_raise (error);
++
++  PyFrida_RETURN_NONE;
++}
++
+ static PyObject *
+ PyScript_eternalize (PyScript * self)
+ {
+@@ -4751,37 +5063,50 @@ frida_python_authentication_service_do_authenticate (GTask * task, FridaPythonAu
+ static int
+ PyCompiler_init (PyCompiler * self, PyObject * args, PyObject * kw)
+ {
+-  PyDeviceManager * manager;
+-
+   if (PyGObject_tp_init ((PyObject *) self, args, kw) < 0)
+     return -1;
+ 
+-  if (!PyArg_ParseTuple (args, "O!", PYFRIDA_TYPE_OBJECT (DeviceManager), &manager))
+-    return -1;
++  g_atomic_int_inc (&toplevel_objects_alive);
+ 
+-  PyGObject_take_handle (&self->parent, frida_compiler_new (PY_GOBJECT_HANDLE (manager)), PYFRIDA_TYPE (Compiler));
++  PyGObject_take_handle (&self->parent, frida_compiler_new (NULL), PYFRIDA_TYPE (Compiler));
+ 
+   return 0;
+ }
+ 
++static void
++PyCompiler_dealloc (PyCompiler * self)
++{
++  g_atomic_int_dec_and_test (&toplevel_objects_alive);
++
++  PyGObject_tp_dealloc ((PyObject *) self);
++}
++
+ static PyObject *
+ PyCompiler_build (PyCompiler * self, PyObject * args, PyObject * kw)
+ {
+   PyObject * result;
+-  static char * keywords[] = { "entrypoint", "project_root", "source_maps", "compression", NULL };
++  static char * keywords[] = { "entrypoint", "project_root", "output_format", "bundle_format", "type_check", "source_maps", "compression",
++    "platform", "externals", NULL };
+   const char * entrypoint;
+   const char * project_root = NULL;
++  const char * output_format = NULL;
++  const char * bundle_format = NULL;
++  const char * type_check = NULL;
+   const char * source_maps = NULL;
+   const char * compression = NULL;
++  const char * platform = NULL;
++  PyObject * externals = NULL;
+   FridaBuildOptions * options;
+   GError * error = NULL;
+   gchar * bundle;
+ 
+-  if (!PyArg_ParseTupleAndKeywords (args, kw, "s|sss", keywords, &entrypoint, &project_root, &source_maps, &compression))
++  if (!PyArg_ParseTupleAndKeywords (args, kw, "s|sssssssO", keywords, &entrypoint, &project_root, &output_format, &bundle_format,
++        &type_check, &source_maps, &compression, &platform, &externals))
+     return NULL;
+ 
+   options = frida_build_options_new ();
+-  if (!PyCompiler_set_options (FRIDA_COMPILER_OPTIONS (options), project_root, source_maps, compression))
++  if (!PyCompiler_set_options (FRIDA_COMPILER_OPTIONS (options), project_root, output_format, bundle_format, type_check, source_maps,
++        compression, platform, externals))
+     goto invalid_option_value;
+ 
+   Py_BEGIN_ALLOW_THREADS
+@@ -4808,19 +5133,27 @@ invalid_option_value:
+ static PyObject *
+ PyCompiler_watch (PyCompiler * self, PyObject * args, PyObject * kw)
+ {
+-  static char * keywords[] = { "entrypoint", "project_root", "source_maps", "compression", NULL };
++  static char * keywords[] = { "entrypoint", "project_root", "output_format", "bundle_format", "type_check", "source_maps", "compression",
++    "platform", "externals", NULL };
+   const char * entrypoint;
+   const char * project_root = NULL;
++  const char * output_format = NULL;
++  const char * bundle_format = NULL;
++  const char * type_check = NULL;
+   const char * source_maps = NULL;
+   const char * compression = NULL;
++  const char * platform = NULL;
++  PyObject * externals = NULL;
+   FridaWatchOptions * options;
+   GError * error = NULL;
+ 
+-  if (!PyArg_ParseTupleAndKeywords (args, kw, "s|sss", keywords, &entrypoint, &project_root, &source_maps, &compression))
++  if (!PyArg_ParseTupleAndKeywords (args, kw, "s|sssssssO", keywords, &entrypoint, &project_root, &output_format, &bundle_format,
++        &type_check, &source_maps, &compression, &platform, &externals))
+     return NULL;
+ 
+   options = frida_watch_options_new ();
+-  if (!PyCompiler_set_options (FRIDA_COMPILER_OPTIONS (options), project_root, source_maps, compression))
++  if (!PyCompiler_set_options (FRIDA_COMPILER_OPTIONS (options), project_root, output_format, bundle_format, type_check, source_maps,
++        compression, platform, externals))
+     goto invalid_option_value;
+ 
+   Py_BEGIN_ALLOW_THREADS
+@@ -4842,12 +5175,43 @@ invalid_option_value:
+ }
+ 
+ static gboolean
+-PyCompiler_set_options (FridaCompilerOptions * options, const gchar * project_root_value, const gchar * source_maps_value,
+-    const gchar * compression_value)
++PyCompiler_set_options (FridaCompilerOptions * options, const gchar * project_root_value, const gchar * output_format_value,
++    const gchar * bundle_format_value, const gchar * type_check_value, const gchar * source_maps_value, const gchar * compression_value,
++    const gchar * platform_value, PyObject * externals_value)
+ {
+   if (project_root_value != NULL)
+     frida_compiler_options_set_project_root (options, project_root_value);
+ 
++  if (output_format_value != NULL)
++  {
++    FridaOutputFormat output_format;
++
++    if (!PyGObject_unmarshal_enum (output_format_value, FRIDA_TYPE_OUTPUT_FORMAT, &output_format))
++      return FALSE;
++
++    frida_compiler_options_set_output_format (options, output_format);
++  }
++
++  if (bundle_format_value != NULL)
++  {
++    FridaBundleFormat bundle_format;
++
++    if (!PyGObject_unmarshal_enum (bundle_format_value, FRIDA_TYPE_BUNDLE_FORMAT, &bundle_format))
++      return FALSE;
++
++    frida_compiler_options_set_bundle_format (options, bundle_format);
++  }
++
++  if (type_check_value != NULL)
++  {
++    FridaTypeCheckMode type_check;
++
++    if (!PyGObject_unmarshal_enum (type_check_value, FRIDA_TYPE_TYPE_CHECK_MODE, &type_check))
++      return FALSE;
++
++    frida_compiler_options_set_type_check (options, type_check);
++  }
++
+   if (source_maps_value != NULL)
+   {
+     FridaSourceMaps source_maps;
+@@ -4868,10 +5232,457 @@ PyCompiler_set_options (FridaCompilerOptions * options, const gchar * project_ro
+     frida_compiler_options_set_compression (options, compression);
+   }
+ 
++  if (platform_value != NULL)
++  {
++    FridaJsPlatform platform;
++
++    if (!PyGObject_unmarshal_enum (platform_value, FRIDA_TYPE_JS_PLATFORM, &platform))
++      return FALSE;
++
++    frida_compiler_options_set_platform (options, platform);
++  }
++
++  if (externals_value != NULL)
++  {
++    gint n, i;
++
++    n = PySequence_Size (externals_value);
++    if (n == -1)
++      return FALSE;
++
++    for (i = 0; i != n; i++)
++    {
++      PyObject * element;
++      gchar * external = NULL;
++
++      element = PySequence_GetItem (externals_value, i);
++      if (element == NULL)
++        return FALSE;
++      PyGObject_unmarshal_string (element, &external);
++      Py_DecRef (element);
++      if (external == NULL)
++        return FALSE;
++
++      frida_compiler_options_add_external (options, external);
++
++      g_free (external);
++    }
++  }
++
+   return TRUE;
+ }
+ 
+ 
++static int
++PyPackageManager_init (PyPackageManager * self, PyObject * args, PyObject * kw)
++{
++  if (PyGObject_tp_init ((PyObject *) self, args, kw) < 0)
++    return -1;
++
++  g_atomic_int_inc (&toplevel_objects_alive);
++
++  PyGObject_take_handle (&self->parent, frida_package_manager_new (), PYFRIDA_TYPE (PackageManager));
++
++  return 0;
++}
++
++static void
++PyPackageManager_dealloc (PyPackageManager * self)
++{
++  g_atomic_int_dec_and_test (&toplevel_objects_alive);
++
++  PyGObject_tp_dealloc ((PyObject *) self);
++}
++
++static PyObject *
++PyPackageManager_repr (PyPackageManager * self)
++{
++  PyObject * result;
++  gchar * repr;
++
++  repr = g_strdup_printf ("PackageManager(registry=\"%s\")", frida_package_manager_get_registry (PY_GOBJECT_HANDLE (self)));
++  result = PyUnicode_FromString (repr);
++  g_free (repr);
++
++  return result;
++}
++
++static PyObject *
++PyPackageManager_get_registry (PyPackageManager * self, void * closure)
++{
++  return PyUnicode_FromString (frida_package_manager_get_registry (PY_GOBJECT_HANDLE (self)));
++}
++
++static int
++PyPackageManager_set_registry (PyPackageManager * self, PyObject * val, void * closure)
++{
++  gchar * registry;
++
++  if (!PyGObject_unmarshal_string (val, &registry))
++    return -1;
++  frida_package_manager_set_registry (PY_GOBJECT_HANDLE (self), registry);
++  g_free (registry);
++
++  return 0;
++}
++
++static PyObject *
++PyPackageManager_search (PyPackageManager * self, PyObject * args, PyObject * kw)
++{
++  FridaPackageSearchResult * result;
++  static char * keywords[] = { "query", "offset", "limit", NULL };
++  const char * query;
++  guint offset = G_MAXUINT;
++  guint limit = G_MAXUINT;
++  FridaPackageSearchOptions * options;
++  GError * error = NULL;
++
++  if (!PyArg_ParseTupleAndKeywords (args, kw, "s|II", keywords, &query, &offset, &limit))
++    return NULL;
++
++  options = frida_package_search_options_new ();
++
++  if (offset != G_MAXUINT)
++    frida_package_search_options_set_offset (options, offset);
++
++  if (limit != G_MAXUINT)
++    frida_package_search_options_set_limit (options, limit);
++
++  Py_BEGIN_ALLOW_THREADS
++  result = frida_package_manager_search_sync (PY_GOBJECT_HANDLE (self), query, options, g_cancellable_get_current (), &error);
++  Py_END_ALLOW_THREADS
++
++  g_object_unref (options);
++
++  if (error != NULL)
++    return PyFrida_raise (error);
++
++  return PyPackageSearchResult_new_take_handle (result);
++}
++
++static PyObject *
++PyPackageManager_install (PyPackageManager * self, PyObject * args, PyObject * kw)
++{
++  FridaPackageInstallResult * result;
++  static char * keywords[] = { "project_root", "role", "specs", "omits", NULL };
++  const char * project_root = NULL;
++  const char * role_value = NULL;
++  PyObject * specs = NULL;
++  PyObject * omits = NULL;
++  FridaPackageInstallOptions * options;
++  GError * error = NULL;
++
++  if (!PyArg_ParseTupleAndKeywords (args, kw, "|ssOO", keywords, &project_root, &role_value, &specs, &omits))
++    return NULL;
++
++  options = PyPackageManager_parse_install_options (project_root, role_value, specs, omits);
++
++  Py_BEGIN_ALLOW_THREADS
++  result = frida_package_manager_install_sync (PY_GOBJECT_HANDLE (self), options, g_cancellable_get_current (), &error);
++  Py_END_ALLOW_THREADS
++
++  g_object_unref (options);
++
++  if (error != NULL)
++    return PyFrida_raise (error);
++
++  return PyPackageInstallResult_new_take_handle (result);
++}
++
++static FridaPackageInstallOptions *
++PyPackageManager_parse_install_options (const gchar * project_root, const char * role_value, PyObject * specs_value, PyObject * omits_value)
++{
++  FridaPackageInstallOptions * options;
++
++  options = frida_package_install_options_new ();
++
++  if (project_root != NULL)
++    frida_package_install_options_set_project_root (options, project_root);
++
++  if (role_value != NULL)
++  {
++    FridaPackageRole role;
++
++    if (!PyGObject_unmarshal_enum (role_value, FRIDA_TYPE_PACKAGE_ROLE, &role))
++      goto propagate_error;
++
++    frida_package_install_options_set_role (options, role);
++  }
++
++  if (specs_value != NULL)
++  {
++    gint n, i;
++
++    n = PySequence_Size (specs_value);
++    if (n == -1)
++      goto propagate_error;
++
++    for (i = 0; i != n; i++)
++    {
++      PyObject * element;
++      gchar * spec = NULL;
++
++      element = PySequence_GetItem (specs_value, i);
++      if (element == NULL)
++        goto propagate_error;
++      PyGObject_unmarshal_string (element, &spec);
++      Py_DecRef (element);
++      if (spec == NULL)
++        goto propagate_error;
++
++      frida_package_install_options_add_spec (options, spec);
++
++      g_free (spec);
++    }
++  }
++
++  if (omits_value != NULL)
++  {
++    gint n, i;
++
++    n = PySequence_Size (omits_value);
++    if (n == -1)
++      goto propagate_error;
++
++    for (i = 0; i != n; i++)
++    {
++      PyObject * element;
++      gchar * str = NULL;
++      FridaPackageRole role;
++
++      element = PySequence_GetItem (omits_value, i);
++      if (element == NULL)
++        goto propagate_error;
++      PyGObject_unmarshal_string (element, &str);
++      Py_DecRef (element);
++      if (str == NULL)
++        goto propagate_error;
++
++      if (!PyGObject_unmarshal_enum (str, FRIDA_TYPE_PACKAGE_ROLE, &role))
++        goto propagate_error;
++
++      frida_package_install_options_add_omit (options, role);
++    }
++  }
++
++  return options;
++
++propagate_error:
++  {
++    g_object_unref (options);
++
++    return NULL;
++  }
++}
++
++
++static PyObject *
++PyPackage_new_take_handle (FridaPackage * handle)
++{
++  return PyGObject_new_take_handle (handle, PYFRIDA_TYPE (Package));
++}
++
++static int
++PyPackage_init (PyPackage * self, PyObject * args, PyObject * kw)
++{
++  if (PyGObject_tp_init ((PyObject *) self, args, kw) < 0)
++    return -1;
++
++  self->name = NULL;
++  self->version = NULL;
++  self->description = NULL;
++  self->url = NULL;
++
++  return 0;
++}
++
++static void
++PyPackage_init_from_handle (PyPackage * self, FridaPackage * handle)
++{
++  self->name = PyUnicode_FromString (frida_package_get_name (handle));
++  self->version = PyUnicode_FromString (frida_package_get_version (handle));
++  self->description = PyGObject_marshal_string (frida_package_get_description (handle));
++  self->url = PyGObject_marshal_string (frida_package_get_url (handle));
++}
++
++static void
++PyPackage_dealloc (PyPackage * self)
++{
++  Py_DecRef (self->url);
++  Py_DecRef (self->description);
++  Py_DecRef (self->version);
++  Py_DecRef (self->name);
++
++  PyGObject_tp_dealloc ((PyObject *) self);
++}
++
++static PyObject *
++PyPackage_repr (PyPackage * self)
++{
++  PyObject * result;
++  FridaPackage * handle;
++  GString * repr;
++  const gchar * description, * url;
++
++  handle = PY_GOBJECT_HANDLE (self);
++
++  repr = g_string_sized_new (256);
++
++  g_string_append_printf (repr, "Package(name=\"%s\", version=\"%s\"",
++      frida_package_get_name (handle),
++      frida_package_get_version (handle));
++
++  description = frida_package_get_description (handle);
++  if (description != NULL)
++  {
++    gchar * escaped = g_strescape (description, NULL);
++    g_string_append_printf (repr, ", description=\"%s\"", escaped);
++    g_free (escaped);
++  }
++
++  url = frida_package_get_url (handle);
++  if (url != NULL)
++    g_string_append_printf (repr, ", url=\"%s\"", url);
++
++  g_string_append (repr, ")");
++
++  result = PyUnicode_FromString (repr->str);
++
++  g_string_free (repr, TRUE);
++
++  return result;
++}
++
++
++static PyObject *
++PyPackageList_marshal (FridaPackageList * list)
++{
++  PyObject * result;
++  gint n, i;
++
++  n = frida_package_list_size (list);
++  result = PyList_New (n);
++  for (i = 0; i != n; i++)
++    PyList_SetItem (result, i, PyPackage_new_take_handle (frida_package_list_get (list, i)));
++
++  return result;
++}
++
++
++static PyObject *
++PyPackageSearchResult_new_take_handle (FridaPackageSearchResult * handle)
++{
++  return PyGObject_new_take_handle (handle, PYFRIDA_TYPE (PackageSearchResult));
++}
++
++static int
++PyPackageSearchResult_init (PyPackageSearchResult * self, PyObject * args, PyObject * kw)
++{
++  if (PyGObject_tp_init ((PyObject *) self, args, kw) < 0)
++    return -1;
++
++  self->packages = NULL;
++  self->total = 0;
++
++  return 0;
++}
++
++static void
++PyPackageSearchResult_init_from_handle (PyPackageSearchResult * self, FridaPackageSearchResult * handle)
++{
++  self->packages = PyPackageList_marshal (frida_package_search_result_get_packages (handle));
++  self->total = frida_package_search_result_get_total (handle);
++}
++
++static void
++PyPackageSearchResult_dealloc (PyPackageSearchResult * self)
++{
++  Py_DecRef (self->packages);
++
++  PyGObject_tp_dealloc ((PyObject *) self);
++}
++
++static PyObject *
++PyPackageSearchResult_repr (PyPackageSearchResult * self)
++{
++  PyObject * result;
++  GString * repr;
++  gint num_packages;
++
++  repr = g_string_new ("PackageSearchResult(packages=");
++
++  num_packages = frida_package_list_size (frida_package_search_result_get_packages (PY_GOBJECT_HANDLE (self)));
++  if (num_packages != 0)
++    g_string_append_printf (repr, "[<%u package%s>]", num_packages, (num_packages == 1) ? "" : "s");
++  else
++    g_string_append (repr, "[]");
++
++  g_string_append_printf (repr, ", total=%u)", self->total);
++
++  result = PyUnicode_FromString (repr->str);
++
++  g_string_free (repr, TRUE);
++
++  return result;
++}
++
++
++static PyObject *
++PyPackageInstallResult_new_take_handle (FridaPackageInstallResult * handle)
++{
++  return PyGObject_new_take_handle (handle, PYFRIDA_TYPE (PackageInstallResult));
++}
++
++static int
++PyPackageInstallResult_init (PyPackageInstallResult * self, PyObject * args, PyObject * kw)
++{
++  if (PyGObject_tp_init ((PyObject *) self, args, kw) < 0)
++    return -1;
++
++  self->packages = NULL;
++
++  return 0;
++}
++
++static void
++PyPackageInstallResult_init_from_handle (PyPackageInstallResult * self, FridaPackageInstallResult * handle)
++{
++  self->packages = PyPackageList_marshal (frida_package_install_result_get_packages (handle));
++}
++
++static void
++PyPackageInstallResult_dealloc (PyPackageInstallResult * self)
++{
++  Py_DecRef (self->packages);
++
++  PyGObject_tp_dealloc ((PyObject *) self);
++}
++
++static PyObject *
++PyPackageInstallResult_repr (PyPackageInstallResult * self)
++{
++  PyObject * result;
++  GString * repr;
++  gint num_packages;
++
++  repr = g_string_new ("PackageInstallResult(packages=");
++
++  num_packages = frida_package_list_size (frida_package_install_result_get_packages (PY_GOBJECT_HANDLE (self)));
++  if (num_packages != 0)
++    g_string_append_printf (repr, "[<%u package%s>]", num_packages, (num_packages == 1) ? "" : "s");
++  else
++    g_string_append (repr, "[]");
++
++  g_string_append (repr, ")");
++
++  result = PyUnicode_FromString (repr->str);
++
++  g_string_free (repr, TRUE);
++
++  return result;
++}
++
++
+ static int
+ PyFileMonitor_init (PyFileMonitor * self, PyObject * args, PyObject * kw)
+ {
+@@ -4883,11 +5694,21 @@ PyFileMonitor_init (PyFileMonitor * self, PyObject * args, PyObject * kw)
+   if (!PyArg_ParseTuple (args, "s", &path))
+     return -1;
+ 
++  g_atomic_int_inc (&toplevel_objects_alive);
++
+   PyGObject_take_handle (&self->parent, frida_file_monitor_new (path), PYFRIDA_TYPE (FileMonitor));
+ 
+   return 0;
+ }
+ 
++static void
++PyFileMonitor_dealloc (PyFileMonitor * self)
++{
++  g_atomic_int_dec_and_test (&toplevel_objects_alive);
++
++  PyGObject_tp_dealloc ((PyObject *) self);
++}
++
+ static PyObject *
+ PyFileMonitor_enable (PyFileMonitor * self)
+ {
+@@ -5438,6 +6259,10 @@ PyInit__frida (void)
+   PYFRIDA_REGISTER_TYPE (PortalService, FRIDA_TYPE_PORTAL_SERVICE);
+   PYFRIDA_REGISTER_TYPE (EndpointParameters, FRIDA_TYPE_ENDPOINT_PARAMETERS);
+   PYFRIDA_REGISTER_TYPE (Compiler, FRIDA_TYPE_COMPILER);
++  PYFRIDA_REGISTER_TYPE (PackageManager, FRIDA_TYPE_PACKAGE_MANAGER);
++  PYFRIDA_REGISTER_TYPE (Package, FRIDA_TYPE_PACKAGE);
++  PYFRIDA_REGISTER_TYPE (PackageSearchResult, FRIDA_TYPE_PACKAGE_SEARCH_RESULT);
++  PYFRIDA_REGISTER_TYPE (PackageInstallResult, FRIDA_TYPE_PACKAGE_INSTALL_RESULT);
+   PYFRIDA_REGISTER_TYPE (FileMonitor, FRIDA_TYPE_FILE_MONITOR);
+   PYFRIDA_REGISTER_TYPE (IOStream, G_TYPE_IO_STREAM);
+   PYFRIDA_REGISTER_TYPE (Cancellable, G_TYPE_CANCELLABLE);
+diff --git a/upstream/frida/core.py b/fork/frida/core.py
+index 0c65155..026c572 100644
+--- a/upstream/frida/core.py
++++ b/fork/frida/core.py
+@@ -33,10 +33,15 @@ if sys.version_info >= (3, 8):
+ else:
+     from typing_extensions import Literal, TypedDict
+ 
++if sys.version_info >= (3, 10):
++    from typing import ParamSpec
++else:
++    from typing_extensions import ParamSpec
++
+ if sys.version_info >= (3, 11):
+-    from typing import NotRequired
++    from typing import NotRequired, cast
+ else:
+-    from typing_extensions import NotRequired
++    from typing_extensions import NotRequired, cast
+ 
+ from . import _frida
+ 
+@@ -72,15 +77,18 @@ def _filter_missing_kwargs(d: MutableMapping[Any, Any]) -> None:
+             d.pop(key)
+ 
+ 
+-R = TypeVar("R")
++P = ParamSpec("P")
++R = TypeVar("R", covariant=True)
+ 
+ 
+-def cancellable(f: Callable[..., R]) -> Callable[..., R]:
++def cancellable(f: Callable[P, R]) -> Callable[P, R]:
++    # currently there is no way to type properly the extended callable with optional cancellable parameter
++    # ref: https://github.com/python/typing/discussions/1905#discussioncomment-11696995
+     @functools.wraps(f)
+-    def wrapper(*args: Any, **kwargs: Any) -> R:
++    def wrapper(*args: P.args, **kwargs: P.kwargs) -> R:
+         cancellable = kwargs.pop("cancellable", None)
+         if cancellable is not None:
+-            with cancellable:
++            with cast(Cancellable, cancellable):
+                 return f(*args, **kwargs)
+ 
+         return f(*args, **kwargs)
+@@ -301,6 +309,15 @@ class Script:
+ 
+         self._impl.load()
+ 
++    @cancellable
++    def interrupt(self) -> None:
++        """
++        Interrupt any JavaScript currently executing in the script, leaving it
++        loaded and able to run again
++        """
++
++        self._impl.interrupt()
++
+     @cancellable
+     def unload(self) -> None:
+         """
+@@ -309,6 +326,15 @@ class Script:
+ 
+         self._impl.unload()
+ 
++    @cancellable
++    def terminate(self) -> None:
++        """
++        Interrupt execution and unload the script, even if it is stuck in a
++        long-running or infinite operation
++        """
++
++        self._impl.terminate()
++
+     @cancellable
+     def eternalize(self) -> None:
+         """
+@@ -351,9 +377,6 @@ class Script:
+     @overload
+     def on(self, signal: Literal["message"], callback: ScriptMessageCallback) -> None: ...
+ 
+-    @overload
+-    def on(self, signal: str, callback: Callable[..., Any]) -> None: ...
+-
+     def on(self, signal: str, callback: Callable[..., Any]) -> None:
+         """
+         Add a signal handler
+@@ -370,9 +393,6 @@ class Script:
+     @overload
+     def off(self, signal: Literal["message"], callback: ScriptMessageCallback) -> None: ...
+ 
+-    @overload
+-    def off(self, signal: str, callback: Callable[..., Any]) -> None: ...
+-
+     def off(self, signal: str, callback: Callable[..., Any]) -> None:
+         """
+         Remove a signal handler
+@@ -693,34 +713,22 @@ class Session:
+         _filter_missing_kwargs(kwargs)
+         return PortalMembership(self._impl.join_portal(address, **kwargs))
+ 
+-    @overload
+     def on(
+         self,
+         signal: Literal["detached"],
+         callback: SessionDetachedCallback,
+-    ) -> None: ...
+-
+-    @overload
+-    def on(self, signal: str, callback: Callable[..., Any]) -> None: ...
+-
+-    def on(self, signal: str, callback: Callable[..., Any]) -> None:
++    ) -> None:
+         """
+         Add a signal handler
+         """
+ 
+         self._impl.on(signal, callback)
+ 
+-    @overload
+     def off(
+         self,
+         signal: Literal["detached"],
+         callback: SessionDetachedCallback,
+-    ) -> None: ...
+-
+-    @overload
+-    def off(self, signal: str, callback: Callable[..., Any]) -> None: ...
+-
+-    def off(self, signal: str, callback: Callable[..., Any]) -> None:
++    ) -> None:
+         """
+         Remove a signal handler
+         """
+@@ -763,9 +771,6 @@ class Bus:
+     @overload
+     def on(self, signal: Literal["message"], callback: BusMessageCallback) -> None: ...
+ 
+-    @overload
+-    def on(self, signal: str, callback: Callable[..., Any]) -> None: ...
+-
+     def on(self, signal: str, callback: Callable[..., Any]) -> None:
+         """
+         Add a signal handler
+@@ -782,9 +787,6 @@ class Bus:
+     @overload
+     def off(self, signal: Literal["message"], callback: BusMessageCallback) -> None: ...
+ 
+-    @overload
+-    def off(self, signal: str, callback: Callable[..., Any]) -> None: ...
+-
+     def off(self, signal: str, callback: Callable[..., Any]) -> None:
+         """
+         Remove a signal handler
+@@ -842,9 +844,6 @@ class Service:
+     @overload
+     def on(self, signal: Literal["message"], callback: ServiceMessageCallback) -> None: ...
+ 
+-    @overload
+-    def on(self, signal: str, callback: Callable[..., Any]) -> None: ...
+-
+     def on(self, signal: str, callback: Callable[..., Any]) -> None:
+         """
+         Add a signal handler
+@@ -858,9 +857,6 @@ class Service:
+     @overload
+     def off(self, signal: Literal["message"], callback: ServiceMessageCallback) -> None: ...
+ 
+-    @overload
+-    def off(self, signal: str, callback: Callable[..., Any]) -> None: ...
+-
+     def off(self, signal: str, callback: Callable[..., Any]) -> None:
+         """
+         Remove a signal handler
+@@ -905,6 +901,14 @@ class Device:
+ 
+         return self._impl.is_lost()
+ 
++    @cancellable
++    def override_option(self, name: str, value: Any) -> None:
++        """
++        Override a backend-specific option
++        """
++
++        self._impl.override_option(name, value)
++
+     @cancellable
+     def query_system_parameters(self) -> Dict[str, Any]:
+         """
+@@ -1060,13 +1064,26 @@ class Device:
+         target: ProcessTarget,
+         realm: Optional[str] = None,
+         persist_timeout: Optional[int] = None,
++        exceptor: Optional[str] = None,
++        unwind_broker: Optional[bool] = None,
++        exit_monitor: Optional[bool] = None,
++        thread_suspend_monitor: Optional[bool] = None,
++        linker_notifier_offsets: Optional[Sequence[int]] = None,
+     ) -> Session:
+         """
+         Attach to a process
+         :param target: the PID or name of the process
+         """
+ 
+-        kwargs = {"realm": realm, "persist_timeout": persist_timeout}
++        kwargs = {
++            "realm": realm,
++            "persist_timeout": persist_timeout,
++            "exceptor": exceptor,
++            "unwind_broker": unwind_broker,
++            "exit_monitor": exit_monitor,
++            "thread_suspend_monitor": thread_suspend_monitor,
++            "linker_notifier_offsets": linker_notifier_offsets,
++        }
+         _filter_missing_kwargs(kwargs)
+         return Session(self._impl.attach(self._pid_of(target), **kwargs))  # type: ignore
+ 
+@@ -1144,9 +1161,6 @@ class Device:
+     @overload
+     def on(self, signal: Literal["lost"], callback: DeviceLostCallback) -> None: ...
+ 
+-    @overload
+-    def on(self, signal: str, callback: Callable[..., Any]) -> None: ...
+-
+     def on(self, signal: str, callback: Callable[..., Any]) -> None:
+         """
+         Add a signal handler
+@@ -1178,9 +1192,6 @@ class Device:
+     @overload
+     def off(self, signal: Literal["lost"], callback: DeviceLostCallback) -> None: ...
+ 
+-    @overload
+-    def off(self, signal: str, callback: Callable[..., Any]) -> None: ...
+-
+     def off(self, signal: str, callback: Callable[..., Any]) -> None:
+         """
+         Remove a signal handler
+@@ -1298,9 +1309,6 @@ class DeviceManager:
+     @overload
+     def on(self, signal: Literal["changed"], callback: DeviceManagerChangedCallback) -> None: ...
+ 
+-    @overload
+-    def on(self, signal: str, callback: Callable[..., Any]) -> None: ...
+-
+     def on(self, signal: str, callback: Callable[..., Any]) -> None:
+         """
+         Add a signal handler
+@@ -1317,9 +1325,6 @@ class DeviceManager:
+     @overload
+     def off(self, signal: Literal["changed"], callback: DeviceManagerChangedCallback) -> None: ...
+ 
+-    @overload
+-    def off(self, signal: str, callback: Callable[..., Any]) -> None: ...
+-
+     def off(self, signal: str, callback: Callable[..., Any]) -> None:
+         """
+         Remove a signal handler
+@@ -1490,9 +1495,6 @@ class PortalService:
+     @overload
+     def on(self, signal: Literal["message"], callback: PortalServiceMessageCallback) -> None: ...
+ 
+-    @overload
+-    def on(self, signal: str, callback: Callable[..., Any]) -> None: ...
+-
+     def on(self, signal: str, callback: Callable[..., Any]) -> None:
+         """
+         Add a signal handler
+@@ -1554,10 +1556,17 @@ CompilerFinishedCallback = Callable[[], None]
+ CompilerOutputCallback = Callable[[str], None]
+ CompilerDiagnosticsCallback = Callable[[List[CompilerDiagnostic]], None]
+ 
++CompilerOutputFormat = Literal["unescaped", "hex-bytes", "c-string"]
++CompilerBundleFormat = Literal["esm", "iife"]
++CompilerTypeCheck = Literal["full", "none"]
++CompilerSourceMaps = Literal["included", "omitted"]
++CompilerCompression = Literal["none", "terser"]
++CompilerPlatform = Literal["neutral", "gum", "browser"]
++
+ 
+ class Compiler:
+     def __init__(self) -> None:
+-        self._impl = _frida.Compiler(get_device_manager()._impl)
++        self._impl = _frida.Compiler()
+ 
+     def __repr__(self) -> str:
+         return repr(self._impl)
+@@ -1567,10 +1576,24 @@ class Compiler:
+         self,
+         entrypoint: str,
+         project_root: Optional[str] = None,
+-        source_maps: Optional[str] = None,
+-        compression: Optional[str] = None,
++        output_format: Optional[CompilerOutputFormat] = None,
++        bundle_format: Optional[CompilerBundleFormat] = None,
++        type_check: Optional[CompilerTypeCheck] = None,
++        source_maps: Optional[CompilerSourceMaps] = None,
++        compression: Optional[CompilerCompression] = None,
++        platform: Optional[CompilerPlatform] = None,
++        externals: Optional[Sequence[str]] = None,
+     ) -> str:
+-        kwargs = {"project_root": project_root, "source_maps": source_maps, "compression": compression}
++        kwargs: dict[str, Any] = {
++            "project_root": project_root,
++            "output_format": output_format,
++            "bundle_format": bundle_format,
++            "type_check": type_check,
++            "source_maps": source_maps,
++            "compression": compression,
++            "platform": platform,
++            "externals": externals,
++        }
+         _filter_missing_kwargs(kwargs)
+         return self._impl.build(entrypoint, **kwargs)
+ 
+@@ -1579,10 +1602,24 @@ class Compiler:
+         self,
+         entrypoint: str,
+         project_root: Optional[str] = None,
+-        source_maps: Optional[str] = None,
+-        compression: Optional[str] = None,
++        output_format: Optional[CompilerOutputFormat] = None,
++        bundle_format: Optional[CompilerBundleFormat] = None,
++        type_check: Optional[CompilerTypeCheck] = None,
++        source_maps: Optional[CompilerSourceMaps] = None,
++        compression: Optional[CompilerCompression] = None,
++        platform: Optional[CompilerPlatform] = None,
++        externals: Optional[Sequence[str]] = None,
+     ) -> None:
+-        kwargs = {"project_root": project_root, "source_maps": source_maps, "compression": compression}
++        kwargs: dict[str, Any] = {
++            "project_root": project_root,
++            "output_format": output_format,
++            "bundle_format": bundle_format,
++            "type_check": type_check,
++            "source_maps": source_maps,
++            "compression": compression,
++            "platform": platform,
++            "externals": externals,
++        }
+         _filter_missing_kwargs(kwargs)
+         return self._impl.watch(entrypoint, **kwargs)
+ 
+@@ -1598,10 +1635,11 @@ class Compiler:
+     @overload
+     def on(self, signal: Literal["diagnostics"], callback: CompilerDiagnosticsCallback) -> None: ...
+ 
+-    @overload
+-    def on(self, signal: str, callback: Callable[..., Any]) -> None: ...
+-
+     def on(self, signal: str, callback: Callable[..., Any]) -> None:
++        """
++        Add a signal handler
++        """
++
+         self._impl.on(signal, callback)
+ 
+     @overload
+@@ -1616,10 +1654,86 @@ class Compiler:
+     @overload
+     def off(self, signal: Literal["diagnostics"], callback: CompilerDiagnosticsCallback) -> None: ...
+ 
+-    @overload
+-    def off(self, signal: str, callback: Callable[..., Any]) -> None: ...
+-
+     def off(self, signal: str, callback: Callable[..., Any]) -> None:
++        """
++        Remove a signal handler
++        """
++
++        self._impl.off(signal, callback)
++
++
++PackageManagerInstallProgressCallback = Callable[
++    [
++        Literal[
++            "initializing",
++            "preparing-dependencies",
++            "resolving-package",
++            "fetching-resource",
++            "package-already-installed",
++            "downloading-package",
++            "package-installed",
++            "resolving-and-installing-all",
++            "complete",
++        ],
++        float,
++        Optional[str],
++    ],
++    None,
++]
++
++PackageRole = Literal["runtime", "development", "optional", "peer"]
++
++
++class PackageManager:
++    def __init__(self) -> None:
++        self._impl = _frida.PackageManager()
++
++    def __repr__(self) -> str:
++        return repr(self._impl)
++
++    @property
++    def registry(self):
++        return self._impl.registry
++
++    @registry.setter
++    def registry(self, value):
++        self._impl.registry = value
++
++    @cancellable
++    def search(
++        self,
++        query: str,
++        offset: Optional[int] = None,
++        limit: Optional[int] = None,
++    ) -> _frida.PackageSearchResult:
++        kwargs = {
++            "offset": offset,
++            "limit": limit,
++        }
++        _filter_missing_kwargs(kwargs)
++        return self._impl.search(query, **kwargs)
++
++    @cancellable
++    def install(
++        self,
++        project_root: Optional[str] = None,
++        role: Optional[PackageRole] = None,
++        specs: Optional[Sequence[str]] = None,
++        omits: Optional[Sequence[PackageRole]] = None,
++    ) -> _frida.PackageInstallResult:
++        kwargs: Dict[str, Any] = {
++            "project_root": project_root,
++            "role": role,
++            "specs": specs,
++            "omits": omits,
++        }
++        _filter_missing_kwargs(kwargs)
++        return self._impl.install(**kwargs)
++
++    def on(self, signal: Literal["install-progress"], callback: PackageManagerInstallProgressCallback) -> None:
++        self._impl.on(signal, callback)
++
++    def off(self, signal: Literal["install-progress"], callback: PackageManagerInstallProgressCallback) -> None:
+         self._impl.off(signal, callback)
+ 
+ 
+diff --git a/upstream/make.bat b/upstream/make.bat
+deleted file mode 100644
+index 6f9f5c0..0000000
+--- a/upstream/make.bat
++++ /dev/null
+@@ -1,23 +0,0 @@
+-@setlocal
+-@echo off
+-rem:: Based on: https://github.com/microsoft/terminal/issues/217#issuecomment-737594785
+-goto :_start_
+-
+-:set_real_dp0
+-set dp0=%~dp0
+-set "dp0=%dp0:~0,-1%"
+-goto :eof
+-
+-:_start_
+-call :set_real_dp0
+-
+-if not exist "%dp0%\releng\meson\meson.py" (
+-  pushd "%dp0%" & git submodule update --init --recursive --depth 1 & popd
+-  if %errorlevel% neq 0 exit /b %errorlevel%
+-)
+-
+-endlocal & goto #_undefined_# 2>nul || title %COMSPEC% & python ^
+-    -c "import sys; sys.path.insert(0, sys.argv[1]); from releng.meson_make import main; main()" ^
+-    "%dp0%" ^
+-    .\build ^
+-    %*
+diff --git a/upstream/meson.build b/fork/meson.build
 index aa96710..7455677 100644
---- a/meson.build
-+++ b/meson.build
+--- a/upstream/meson.build
++++ b/fork/meson.build
 @@ -5,7 +5,12 @@ project('frida-python', 'c',
    meson_version: '>=1.3.0',
  )
@@ -109,10 +2639,27 @@ index aa96710..7455677 100644
 -  timeout: 30,
 -)
 +subdir('frida')
-diff --git a/setup.py b/setup.py
+diff --git a/fork/meson_options.txt b/fork/meson_options.txt
+new file mode 100644
+index 0000000..37d05a8
+--- /dev/null
++++ b/fork/meson_options.txt
+@@ -0,0 +1,11 @@
++option('python',
++  type: 'string',
++  value: '',
++  description: 'Python interpreter to build for'
++)
++
++option('python_incdir',
++  type: 'string',
++  value: '',
++  description: 'Python headers directory to build against'
++)
+diff --git a/upstream/setup.py b/fork/setup.py
 index 488e047..25fd1e1 100644
---- a/setup.py
-+++ b/setup.py
+--- a/upstream/setup.py
++++ b/fork/setup.py
 @@ -1,25 +1,109 @@
  import os
  import platform
@@ -313,3 +2860,110 @@ index 488e047..25fd1e1 100644
 -
 -if __name__ == "__main__":
 -    main()
+diff --git a/upstream/subprojects/frida-core.wrap b/upstream/subprojects/frida-core.wrap
+deleted file mode 100644
+index 900126e..0000000
+--- a/upstream/subprojects/frida-core.wrap
++++ /dev/null
+@@ -1,8 +0,0 @@
+-[wrap-git]
+-url = https://github.com/frida/frida-core.git
+-revision = 16.6.6
+-depth = 1
+-
+-[provide]
+-dependency_names = frida-core-1.0
+-
+diff --git a/upstream/tests/test_rpc.py b/fork/tests/test_rpc.py
+index 318c81e..b5b1b7b 100644
+--- a/upstream/tests/test_rpc.py
++++ b/fork/tests/test_rpc.py
+@@ -31,41 +31,27 @@ class TestRpc(unittest.TestCase):
+             name="test-rpc",
+             source="""\
+ rpc.exports = {
+-    add(a, b) {
+-        const result = a + b;
++    add: function (a, b) {
++        var result = a + b;
+         if (result < 0)
+-            throw new Error("No");
++          throw new Error("No");
+         return result;
+     },
+-    sub(a, b) {
++    sub: function (a, b) {
+         return a - b;
+     },
+-    speak() {
+-        const buf = Memory.allocUtf8String("Yo");
++    speak: function () {
++        var buf = Memory.allocUtf8String("Yo");
+         return Memory.readByteArray(buf, 2);
+-    },
+-    speakWithMetadata() {
+-        const buf = Memory.allocUtf8String("Yo");
+-        return ['soft', Memory.readByteArray(buf, 2)];
+-    },
+-    processData(val, data) {
+-        return { val, dump: hexdump(data, { header: false }) };
+-    },
++    }
+ };
+ """,
+         )
+         script.load()
+-        agent = script.exports_sync
+-        self.assertEqual(agent.add(2, 3), 5)
+-        self.assertEqual(agent.sub(5, 3), 2)
+-        self.assertRaises(Exception, lambda: agent.add(1, -2))
+-        self.assertEqual(agent.speak(), b"\x59\x6f")
+-        meta, data = agent.speak_with_metadata()
+-        self.assertEqual(meta, "soft")
+-        self.assertEqual(data, b"\x59\x6f")
+-        result = agent.process_data(1337, b"\x13\x37")
+-        self.assertEqual(result["val"], 1337)
+-        self.assertEqual(result["dump"], "00000000  13 37                                            .7")
++        self.assertEqual(script.exports.add(2, 3), 5)
++        self.assertEqual(script.exports.sub(5, 3), 2)
++        self.assertRaises(Exception, lambda: script.exports.add(1, -2))
++        self.assertListEqual([x for x in iter(script.exports.speak())], [0x59, 0x6F])
+ 
+     def test_post_failure(self):
+         script = self.session.create_script(
+@@ -78,7 +64,7 @@ rpc.exports = {
+ """,
+         )
+         script.load()
+-        agent = script.exports_sync
++        agent = script.exports
+ 
+         self.session.detach()
+         self.assertRaisesScriptDestroyed(lambda: agent.init())
+@@ -96,7 +82,7 @@ rpc.exports = {
+ """,
+         )
+         script.load()
+-        agent = script.exports_sync
++        agent = script.exports
+ 
+         def unload_script_after_100ms():
+             time.sleep(0.1)
+@@ -118,7 +104,7 @@ rpc.exports = {
+ """,
+         )
+         script.load()
+-        agent = script.exports_sync
++        agent = script.exports
+ 
+         def terminate_target_after_100ms():
+             time.sleep(0.1)
+@@ -140,7 +126,7 @@ rpc.exports = {
+ """,
+         )
+         script.load()
+-        agent = script.exports_sync
++        agent = script.exports
+ 
+         def cancel_after_100ms():
+             time.sleep(0.1)
