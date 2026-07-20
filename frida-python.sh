@@ -28,13 +28,13 @@ cd $TMPDIR
 
 # Update and install required packages
 apt update && pkg upgrade -y
-pkg i -y python git curl && pip install -U setuptools
+pkg i -y python git curl && pip install -U setuptools wheel
 
 # Fetch latest Frida version
-FRIDA_VERSION=$(curl -s https://api.github.com/repos/Alexjr2/Frida_Termux_Installation/releases/latest | grep -oP '"tag_name":\s*"\K[^"]+')
+FRIDA_VERSION=$(curl -s https://api.github.com/repos/frida/frida/releases/latest | grep -oP '"tag_name":\s*"\K[^"]+')
 
 # Download Frida devkit
-DEVKIT_URL="https://github.com/Alexjr2/Frida_Termux_Installation/releases/latest/download/frida-core-devkit-android-$arch.tar.xz"
+DEVKIT_URL="https://github.com/frida/frida/releases/latest/download/frida-core-devkit-$FRIDA_VERSION-android-$arch.tar.xz"
 DEVKIT_FILE="frida-core-devkit-android-$arch.tar.xz"
 
 curl -L -o "$DEVKIT_FILE" "$DEVKIT_URL"
