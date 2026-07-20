@@ -3,11 +3,11 @@
 
 ## Installing Python
 ```bash
-apt update && apt upgrade && apt install build-essential python python-pip git wget binutils openssl && pip cache purge
+apt update && apt upgrade && apt install build-essential python python-pip git curl binutils openssl && pip cache purge
 ```
 ## Installing frida
 ```
-cd $TMPDIR && wget https://raw.githubusercontent.com/Alexjr2/Frida_Termux_Installation/main/frida-python.sh && bash frida-python.sh && cd && pip install frida-tools && pip cache purge
+cd $TMPDIR && curl -fsSL https://raw.githubusercontent.com/Alexjr2/Frida_Termux_Installation/main/frida-python.sh | bash && cd && pip install frida-tools && pip cache purge
 ```
 # Credits
 - [frida](https://github.com/frida/frida) : Official Frida Repository
