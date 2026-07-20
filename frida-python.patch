@@ -185,7 +185,7 @@ index a4d189a..0000000
 -    "$srcroot" \
 -    "$@"
 diff --git a/configure.bat b/configure.bat
-deleted file mode 100644
+deleted file mode 100755
 index 721c958..0000000
 --- a/configure.bat
 +++ /dev/null
@@ -2500,7 +2500,7 @@ index 0c65155..026c572 100644
  
  
 diff --git a/make.bat b/make.bat
-deleted file mode 100644
+deleted file mode 100755
 index 6f9f5c0..0000000
 --- a/make.bat
 +++ /dev/null
