@@ -11,7 +11,7 @@ cd $TMPDIR && curl -fsSL https://raw.githubusercontent.com/Alexjr2/Frida_Termux_
 ```
 ## Installing dependencies
 ```
-pip install frida-tools --no-deps && pip install colorama prompt_toolkit pygments && pip cache purge
+pip install frida-tools==16.6.6 --no-deps && pip install colorama prompt_toolkit pygments && pip cache purge
 ```
 # Credits
 - [frida](https://github.com/frida/frida) : Official Frida Repository
