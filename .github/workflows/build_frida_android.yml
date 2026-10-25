@@ -49,9 +49,14 @@ jobs:
     - name: Clone frida repository
       shell: bash
       run: |
-        git clone --recurse-submodules https://github.com/frida/frida
-        git -C frida checkout --detach "$FRIDA_VERSION"
-        git -C frida submodule update --init --recursive
+        git clone \
+          --depth 1 \
+          --shallow-submodules \
+          --recurse-submodules \
+          --jobs 4 \
+          --branch "$FRIDA_VERSION" \
+          https://github.com/frida/frida \
+          frida
 
     - name: Configure
       run: cd frida && >-
