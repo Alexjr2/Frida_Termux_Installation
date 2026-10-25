@@ -2,16 +2,14 @@ name: "Build Frida for Android"
 
 on:
   workflow_dispatch:
-   inputs:
-    FRIDA_VERSION:
-      description: 'FRIDA_VERSION'
-      required: true
 
 permissions:
   contents: write
 
 jobs:
   android_build:
+    env:
+      FRIDA_PREFIX: ${{ github.workspace }}/dist
     strategy:
       matrix:
         arch: [x86, x86_64, arm, arm64]
@@ -40,10 +38,20 @@ jobs:
       run: |
         mkdir release-assets
 
+    - name: Get latest Frida version
+      id: frida-version
+      shell: bash
+      run: |
+        FRIDA_VERSION=$(curl -fsSL https://api.github.com/repos/frida/frida/releases/latest | grep -oP '"tag_name":\s*"\K[^"]+')
+        echo "FRIDA_VERSION=$FRIDA_VERSION" >> "$GITHUB_ENV"
+        echo "version=$FRIDA_VERSION" >> "$GITHUB_OUTPUT"
+
     - name: Clone frida repository
       shell: bash
       run: |
         git clone --recurse-submodules https://github.com/frida/frida
+        git -C frida checkout --detach "$FRIDA_VERSION"
+        git -C frida submodule update --init --recursive
 
     - name: Configure
       run: cd frida && >-
@@ -59,6 +67,7 @@ jobs:
           -Dfrida-gum:database=disabled
           -Dfrida-gum:tests=disabled
           -Dfrida-core:devkits=core
+          -Dfrida-core:compiler_backend=enabled
           -Dfrida-core:connectivity=disabled
           -Dfrida-core:mapper=enabled
           -Dfrida-core:tests=disabled
@@ -67,32 +76,32 @@ jobs:
       run: cd frida && make && make install
 
     - name: tar core devkit
-      run: cd release-assets && tar -cJvf frida-core-devkit-android-${{ matrix.arch }}.tar.xz -C ../frida${{ env.FRIDA_PREFIX }}/lib/frida-1.0/devkits/core/ .
+      run: tar -cJvf "release-assets/frida-core-devkit-${FRIDA_VERSION}-android-${{ matrix.arch }}.tar.xz" -C "$FRIDA_PREFIX/lib/frida-1.0/devkits/core" .
 
     - name: tar gum devkit
-      run: cd release-assets && tar -cJvf frida-gum-devkit-android-${{ matrix.arch }}.tar.xz -C ../frida${{ env.FRIDA_PREFIX }}/lib/frida-1.0/devkits/gum/ .
+      run: tar -cJvf "release-assets/frida-gum-devkit-${FRIDA_VERSION}-android-${{ matrix.arch }}.tar.xz" -C "$FRIDA_PREFIX/lib/frida-1.0/devkits/gum" .
 
     - name: tar gumjs devkit
-      run: cd release-assets && tar -cJvf frida-gumjs-devkit-android-${{ matrix.arch }}.tar.xz -C ../frida${{ env.FRIDA_PREFIX }}/lib/frida-1.0/devkits/gumjs/ .
+      run: tar -cJvf "release-assets/frida-gumjs-devkit-${FRIDA_VERSION}-android-${{ matrix.arch }}.tar.xz" -C "$FRIDA_PREFIX/lib/frida-1.0/devkits/gumjs" .
 
     - name: tar frida-inject
-      run: cd release-assets && tar -cJvf frida-inject-android-${{ matrix.arch }}.tar.xz -C ../frida${{ env.FRIDA_PREFIX }}/bin/ frida-inject
+      run: tar -cJvf "release-assets/frida-inject-${FRIDA_VERSION}-android-${{ matrix.arch }}.tar.xz" -C "$FRIDA_PREFIX/bin" frida-inject
 
     - name: tar frida-server
-      run: cd release-assets && tar -cJvf frida-server-android-${{ matrix.arch }}.tar.xz -C ../frida${{ env.FRIDA_PREFIX }}/bin/ frida-server      
+      run: tar -cJvf "release-assets/frida-server-${FRIDA_VERSION}-android-${{ matrix.arch }}.tar.xz" -C "$FRIDA_PREFIX/bin" frida-server
 
     - name: tar 32-bit frida-gadget
       if: ${{ !contains(matrix.arch, '64') }}
-      run: cd release-assets && tar -cJvf frida-gadget-android-${{ matrix.arch }}.tar.xz -C ../frida${{ env.FRIDA_PREFIX }}/lib/frida-1.0/32/ frida-gadget.so
+      run: tar -cJvf "release-assets/frida-gadget-${FRIDA_VERSION}-android-${{ matrix.arch }}.tar.xz" -C "$FRIDA_PREFIX/lib/frida-1.0/32" frida-gadget.so
 
     - name: tar 64-bit frida-gadget
       if: ${{ contains(matrix.arch, '64') }}
-      run: cd release-assets && tar -cJvf frida-gadget-android-${{ matrix.arch }}.tar.xz -C ../frida${{ env.FRIDA_PREFIX }}/lib/frida-1.0/64/ frida-gadget.so
+      run: tar -cJvf "release-assets/frida-gadget-${FRIDA_VERSION}-android-${{ matrix.arch }}.tar.xz" -C "$FRIDA_PREFIX/lib/frida-1.0/64" frida-gadget.so
 
     - name: Create release frida ${{ matrix.arch }}
       uses: ncipollo/release-action@main
       with:
-        tag: ${{ github.event.inputs.FRIDA_VERSION }}
-        name: "Frida ${{ github.event.inputs.FRIDA_VERSION }}"
+        tag: ${{ steps.frida-version.outputs.version }}
+        name: "Frida ${{ steps.frida-version.outputs.version }}"
         allowUpdates: true
         artifacts: release-assets/*
